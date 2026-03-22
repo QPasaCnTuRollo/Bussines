@@ -2,53 +2,63 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>V-MASTER | Neural Interface</title>
+    <title>V-MASTERS | Financial Intelligence</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Source+Code+Pro:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #050608; --card: #10121a; --accent: #00d4ff; --success: #00ffa3; --danger: #ff4d4d; --text: #f0f6fc; --border: #262c36; }
+        :root { --bg: #050608; --card: #0d0f14; --accent: #00d4ff; --success: #00ffa3; --danger: #ff4d4d; --text: #f0f6fc; --border: #1c2128; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; }
 
-        /* LOGIN */
+        /* LOGIN Y TRANSICIÓN (Tus favoritos optimizados) */
         #login-screen { position: fixed; inset: 0; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 1000; transition: 0.8s; }
-        .login-card { background: var(--card); padding: 40px; border-radius: 24px; border: 1px solid var(--border); width: 320px; text-align: center; font-family: 'Source Code Pro', monospace; }
-
-        /* TRANSICIÓN BIENVENIDA */
-        #welcome-transition { position: fixed; inset: 0; background: var(--bg); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 999; transition: 0.5s; }
-        .logo-anim { width: 150px; height: 150px; opacity: 0; transform: scale(0.8); border-radius: 20px; border: 2px solid var(--accent); }
-        .welcome-text { margin-top: 20px; font-family: 'Source Code Pro', monospace; font-size: 1.2rem; letter-spacing: 4px; opacity: 0; color: var(--accent); }
-
-        /* DASHBOARD */
-        #main-content { display: none; opacity: 0; padding: 20px; height: 100vh; overflow-y: auto; transition: 1s; }
-        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .dac7-radar { background: var(--card); padding: 15px 25px; border-radius: 20px; border: 1px solid var(--border); margin-bottom: 20px; display: flex; align-items: center; gap: 20px; }
-        .progress-bar { flex: 1; height: 8px; background: #1c2128; border-radius: 10px; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--success); width: 0%; transition: 1s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
-
-        .grid { display: grid; grid-template-columns: 350px 1fr; gap: 20px; }
-        .card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 20px; }
-        input, select { background: #000; border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 10px; width: 100%; margin-top: 8px; box-sizing: border-box; }
+        .login-card { background: var(--card); padding: 40px; border-radius: 24px; border: 1px solid var(--border); width: 320px; text-align: center; box-shadow: 0 0 50px rgba(0, 212, 255, 0.1); }
+        input, select { background: #000; border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 10px; width: 100%; margin-top: 10px; box-sizing: border-box; font-family: inherit; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
-        .btn-v { background: var(--accent); color: #000; border: none; padding: 12px; border-radius: 10px; font-weight: 800; width: 100%; cursor: pointer; margin-top: 15px; }
-        .btn-act { padding: 5px 10px; border-radius: 5px; cursor: pointer; border: 1px solid #333; background: none; color: #fff; font-size: 0.7rem; }
+        #welcome-transition { position: fixed; inset: 0; background: var(--bg); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 999; }
+        .logo-anim { width: 130px; height: 130px; opacity: 0; transform: scale(0.7); border-radius: 20px; border: 2px solid var(--accent); margin: 0 15px; }
+        .welcome-text { margin-top: 30px; font-family: 'Source Code Pro', monospace; font-size: 1.4rem; letter-spacing: 6px; opacity: 0; color: var(--accent); text-shadow: 0 0 10px var(--accent); }
+
+        /* V-MASTERS UI */
+        #main-content { display: none; opacity: 0; padding: 25px; height: 100vh; overflow-y: auto; transition: 1s; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 25px; }
+        .clock { font-family: 'Source Code Pro', monospace; color: var(--accent); font-weight: 700; font-size: 1.1rem; }
+
+        .dac7-radar { background: linear-gradient(90deg, #0d0f14, #161b22); padding: 20px; border-radius: 20px; border: 1px solid var(--border); display: flex; align-items: center; gap: 30px; margin-bottom: 30px; }
+        .progress-container { flex: 1; height: 10px; background: #000; border-radius: 20px; overflow: hidden; border: 1px solid #222; }
+        .progress-fill { height: 100%; background: var(--success); width: 0%; transition: 1.5s cubic-bezier(0.22, 1, 0.36, 1); box-shadow: 0 0 15px var(--success); }
+
+        .grid-layout { display: grid; grid-template-columns: 380px 1fr 300px; gap: 25px; }
+        .card { background: var(--card); border: 1px solid var(--border); padding: 25px; border-radius: 24px; position: relative; }
         
-        @keyframes pop { to { opacity: 1; transform: scale(1); } }
+        .stat-box { text-align: center; padding: 20px; border-radius: 15px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); margin-bottom: 15px; }
+        .stat-val { display: block; font-size: 1.8rem; font-weight: 800; }
+
+        .btn-action { background: var(--accent); color: #000; border: none; padding: 15px; border-radius: 12px; font-weight: 800; width: 100%; cursor: pointer; margin-top: 20px; transition: 0.3s; }
+        .btn-action:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; color: #8b949e; font-size: 0.7rem; text-transform: uppercase; padding: 10px; }
+        td { padding: 14px 10px; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+        
+        .badge-price { color: var(--success); font-weight: 800; font-family: 'Source Code Pro', monospace; }
+        @keyframes fadeInPop { to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
         <div class="login-card">
-            <h2 style="color:var(--accent)">V-MASTER_AUTH</h2>
-            <input type="text" id="user-input" placeholder="USER_ID">
-            <input type="password" id="pass-input" placeholder="PASS_KEY">
-            <button class="btn-v" onclick="validar()">INITIALIZE</button>
+            <h1 style="font-weight:800; font-size:1.8rem; margin-bottom:30px;">V-MASTERS<span style="color:var(--accent)">.</span></h1>
+            <div style="text-align:left"><label style="font-size:0.7rem; color:var(--accent)">USUARIO_ID</label></div>
+            <input type="text" id="user-input" placeholder="Introduce usuario...">
+            <div style="text-align:left; margin-top:15px;"><label style="font-size:0.7rem; color:var(--accent)">CONTRASEÑA</label></div>
+            <input type="password" id="pass-input" placeholder="••••••••">
+            <button class="btn-action" onclick="validarAcceso()">INICIAR SISTEMA</button>
         </div>
     </div>
 
     <div id="welcome-transition">
-        <div style="display:flex; gap:20px">
+        <div style="display:flex">
             <img src="logo1.png" class="logo-anim" id="l1">
             <img src="logo2.png" class="logo-anim" id="l2">
         </div>
@@ -57,136 +67,201 @@
 
     <div id="main-content">
         <div class="top-bar">
-            <h2>V-MASTER <span style="color:var(--accent)">SYSTEM</span></h2>
-            <button class="btn-act" style="color:var(--danger)" onclick="location.reload()">CERRAR SESIÓN</button>
+            <div>
+                <h2 style="margin:0">PANEL <span style="color:var(--accent)">V-MASTERS</span></h2>
+                <div class="clock" id="live-clock">00:00:00</div>
+            </div>
+            <button class="btn-action" style="width:auto; margin:0; background:rgba(255,77,77,0.1); color:var(--danger); border:1px solid var(--danger); padding:8px 15px;" onclick="location.reload()">CERRAR SESIÓN</button>
         </div>
 
         <div class="dac7-radar">
-            <div><b id="dac-label">SEGURIDAD DAC7</b><br><small id="cuenta-name">Cargando...</small></div>
-            <div class="progress-bar"><div id="dac-fill" class="progress-fill"></div></div>
-            <div id="dac-info">0/30 vtas</div>
+            <div style="min-width:180px">
+                <b style="font-size:0.9rem">RADAR FISCAL DAC7</b><br>
+                <small id="active-account" style="color:var(--accent)">Selecciona una cuenta</small>
+            </div>
+            <div class="progress-container"><div id="dac-bar" class="progress-fill"></div></div>
+            <div style="text-align:right; min-width:120px">
+                <b id="dac-count">0 / 30</b><br><small>VENTAS ESTE AÑO</small>
+            </div>
         </div>
 
-        <div class="grid">
+        <div class="grid-layout">
             <div class="card">
-                <h3>Gestión Stock</h3>
-                <select id="select-cuenta" onchange="actualizarRadar()"></select>
-                <input type="hidden" id="edit-id">
-                <input type="text" id="art" placeholder="Nombre Artículo">
-                <input type="number" id="pc" placeholder="Coste Compra (€)">
-                <input type="number" id="pv" placeholder="Precio Venta (€)">
+                <h3 style="margin-top:0">Registrar Venta</h3>
+                <label style="font-size:0.65rem">CUENTA GMAIL DE VENTA</label>
+                <select id="sel-cuenta" onchange="updateUI()"></select>
+                
+                <input type="text" id="art" placeholder="Nombre del Producto">
+                <div style="display:flex; gap:10px">
+                    <input type="number" id="pc" placeholder="Coste Compra (€)">
+                    <input type="number" id="env" placeholder="Gasto Envío (€)">
+                </div>
+                <input type="number" id="pv" placeholder="PRECIO VENTA FINAL (€)" style="border-color:var(--success); font-weight:800;">
                 <input type="number" id="uni" value="1">
-                <button class="btn-v" id="btn-save" onclick="guardar()">GUARDAR EN NUBE</button>
+                
+                <button class="btn-action" onclick="enviarVenta()">SUBIR A LA NUBE</button>
             </div>
+
+            <div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:20px;">
+                    <div class="stat-box"><small>INGRESOS TOTALES</small><span class="stat-val" id="t-ingresos" style="color:var(--accent)">0.00€</span></div>
+                    <div class="stat-box"><small>BENEFICIO NETO</small><span class="stat-val" id="t-neto" style="color:var(--success)">0.00€</span></div>
+                </div>
+                <div class="card" style="height:400px; overflow-y:auto">
+                    <table>
+                        <thead><tr><th>ARTÍCULO</th><th>CUENTA</th><th>NETO</th><th>ACCIONES</th></tr></thead>
+                        <tbody id="historial"></tbody>
+                    </table>
+                </div>
+            </div>
+
             <div class="card">
-                <table>
-                    <tbody id="lista-productos"></tbody>
-                </table>
+                <h3 style="margin:0 0 20px 0; font-size:0.9rem">GASTOS VS BENEFICIO</h3>
+                <canvas id="profitChart"></canvas>
+                <div class="stat-box" style="margin-top:20px; border-color:var(--danger)">
+                    <small>GASTO TOTAL ACUMULADO</small>
+                    <span class="stat-val" id="t-gastos" style="color:var(--danger)">0.00€</span>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         const AUTH = { user: "QPasaCnTuRollo", pass: "3F@guqu3" };
-        let globalData = [];
+        let salesData = [];
+        let myChart = null;
 
-        function validar() {
+        // RELOJ TIEMPO REAL
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('live-clock').innerText = now.toLocaleTimeString('es-ES', { hour12: false });
+        }, 1000);
+
+        function validarAcceso() {
             if(document.getElementById('user-input').value === AUTH.user && document.getElementById('pass-input').value === AUTH.pass) {
                 document.getElementById('login-screen').style.opacity = '0';
-                setTimeout(showWelcome, 500);
-            } else { alert("Error de acceso"); }
+                setTimeout(iniciarBienvenida, 600);
+            } else { alert("ACCESO DENEGADO"); }
         }
 
-        function showWelcome() {
+        function iniciarBienvenida() {
             document.getElementById('login-screen').style.display = 'none';
-            const wt = document.getElementById('welcome-transition');
-            wt.style.display = 'flex';
-            setTimeout(() => document.getElementById('l1').style.animation = 'pop 0.6s forwards', 200);
-            setTimeout(() => document.getElementById('l2').style.animation = 'pop 0.6s forwards', 600);
+            const trans = document.getElementById('welcome-transition');
+            trans.style.display = 'flex';
+            
+            setTimeout(() => document.getElementById('l1').style.animation = 'fadeInPop 0.6s forwards', 200);
+            setTimeout(() => document.getElementById('l2').style.animation = 'fadeInPop 0.6s forwards', 600);
             setTimeout(() => document.getElementById('w-text').style.opacity = '1', 1200);
+            
             setTimeout(() => {
-                wt.style.opacity = '0';
-                setTimeout(showDashboard, 500);
+                trans.style.opacity = '0';
+                setTimeout(() => {
+                    trans.style.display = 'none';
+                    const main = document.getElementById('main-content');
+                    main.style.display = 'block';
+                    setTimeout(() => main.style.opacity = '1', 50);
+                    initCore();
+                }, 600);
             }, 3000);
         }
 
-        function showDashboard() {
-            document.getElementById('welcome-transition').style.display = 'none';
-            const mc = document.getElementById('main-content');
-            mc.style.display = 'block';
-            setTimeout(() => mc.style.opacity = '1', 50);
-            init();
-        }
-
-        async function init() {
+        async function initCore() {
             await cargarCuentas();
-            await cargarDatos();
+            await fetchData();
         }
 
         async function cargarCuentas() {
-            const r = await fetch('/api/cuentas');
-            const d = await r.json();
-            document.getElementById('select-cuenta').innerHTML = d.map(c => `<option value="${c.id}">${c.nombre_gmail}</option>`).join('');
+            const res = await fetch('/api/cuentas');
+            const data = await res.json();
+            document.getElementById('sel-cuenta').innerHTML = data.map(c => `<option value="${c.id}">${c.nombre_gmail}</option>`).join('');
         }
 
-        async function cargarDatos() {
-            const r = await fetch('/api/datos');
-            globalData = await r.json();
-            const tabla = document.getElementById('lista-productos');
-            tabla.innerHTML = globalData.map(p => `
-                <tr>
-                    <td><b>${p.articulo}</b><br><small>${p.cuentas ? p.cuentas.nombre_gmail : '-'}</small></td>
-                    <td style="color:var(--success)">${p.precio_venta}€</td>
-                    <td>
-                        <button class="btn-act" onclick="vender(${p.id})">${p.estado === 'Stock' ? 'VENDER' : '✅'}</button>
-                        <button class="btn-act" onclick="prepararEdit(${JSON.stringify(p).replace(/"/g, '&quot;')})">✎</button>
-                        <button class="btn-act" style="color:var(--danger)" onclick="eliminar(${p.id})">🗑</button>
-                    </td>
-                </tr>`).join('');
-            actualizarRadar();
+        async function fetchData() {
+            const res = await fetch('/api/datos');
+            salesData = await res.json();
+            updateUI();
         }
 
-        function actualizarRadar() {
-            const idC = document.getElementById('select-cuenta').value;
-            const nombreC = document.getElementById('select-cuenta').options[document.getElementById('select-cuenta').selectedIndex].text;
-            const ventas = globalData.filter(p => p.id_cuenta == idC && p.estado === 'Vendido').length;
-            const porc = (ventas / 30) * 100;
-            document.getElementById('dac-fill').style.width = Math.min(porc, 100) + '%';
-            document.getElementById('dac-info').innerText = `${ventas}/30 vtas`;
-            document.getElementById('cuenta-name').innerText = nombreC;
-            document.getElementById('dac-fill').style.background = porc > 80 ? 'var(--danger)' : 'var(--success)';
+        function updateUI() {
+            let ingresos = 0, gastos = 0, neto = 0;
+            const cuentaActivaId = document.getElementById('sel-cuenta').value;
+            const cuentaNombre = document.getElementById('sel-cuenta').options[document.getElementById('sel-cuenta').selectedIndex]?.text;
+            
+            const tabla = document.getElementById('historial');
+            tabla.innerHTML = salesData.map(s => {
+                const costeTotal = (s.precio_compra + s.envio_pago) * s.unidades;
+                const tasaVinted = (s.precio_venta * 0.05) + 0.70;
+                const beneficioItem = (s.precio_venta - tasaVinted - (s.precio_compra + s.envio_pago)) * s.unidades;
+
+                ingresos += s.precio_venta * s.unidades;
+                gastos += costeTotal;
+                neto += beneficioItem;
+
+                return `<tr>
+                    <td><b>${s.articulo}</b><br><small>${new Date(s.fecha_venta).toLocaleDateString()}</small></td>
+                    <td><span style="font-size:0.7rem; color:var(--accent)">${s.cuentas?.nombre_gmail}</span></td>
+                    <td class="badge-price">${beneficioItem.toFixed(2)}€</td>
+                    <td><button onclick="eliminarVenta(${s.id})" style="background:none; border:none; color:var(--danger); cursor:pointer">🗑</button></td>
+                </tr>`;
+            }).join('');
+
+            // Actualizar Totales
+            document.getElementById('t-ingresos').innerText = ingresos.toFixed(2) + "€";
+            document.getElementById('t-gastos').innerText = gastos.toFixed(2) + "€";
+            document.getElementById('t-neto').innerText = neto.toFixed(2) + "€";
+
+            // Radar DAC7
+            const ventasCuenta = salesData.filter(s => s.id_cuenta == cuentaActivaId).length;
+            const porc = (ventasCuenta / 30) * 100;
+            document.getElementById('dac-bar').style.width = Math.min(porc, 100) + "%";
+            document.getElementById('dac-count').innerText = `${ventasCuenta} / 30`;
+            document.getElementById('active-account').innerText = "Vigilando: " + cuentaNombre;
+            document.getElementById('dac-bar').style.background = porc > 80 ? 'var(--danger)' : 'var(--success)';
+
+            actualizarGrafico(gastos, neto);
         }
 
-        async function guardar() {
-            const id = document.getElementById('edit-id').value;
-            const body = {
-                articulo: document.getElementById('art').value,
-                id_cuenta: document.getElementById('select-cuenta').value,
-                precio_compra: parseFloat(document.getElementById('pc').value),
-                precio_venta: parseFloat(document.getElementById('pv').value),
-                unidades: parseInt(document.getElementById('uni').value),
-                estado: 'Stock'
-            };
-            await fetch(id ? `/api/editar/${id}` : '/api/nuevo', {
-                method: id ? 'PUT' : 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(body)
+        function actualizarGrafico(g, n) {
+            const ctx = document.getElementById('profitChart').getContext('2d');
+            if(myChart) myChart.destroy();
+            myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Gastos', 'Beneficio Neto'],
+                    datasets: [{
+                        data: [g, n],
+                        backgroundColor: ['#ff4d4d', '#00ffa3'],
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
+                },
+                options: { plugins: { legend: { display: false } }, cutout: '80%' }
             });
-            document.getElementById('edit-id').value = "";
-            document.getElementById('btn-save').innerText = "GUARDAR EN NUBE";
-            cargarDatos();
         }
 
-        function prepararEdit(p) {
-            document.getElementById('edit-id').value = p.id;
-            document.getElementById('art').value = p.articulo;
-            document.getElementById('pc').value = p.precio_compra;
-            document.getElementById('pv').value = p.precio_venta;
-            document.getElementById('btn-save').innerText = "ACTUALIZAR DATOS";
+        async function enviarVenta() {
+            const data = {
+                articulo: document.getElementById('art').value,
+                id_cuenta: document.getElementById('sel-cuenta').value,
+                precio_compra: parseFloat(document.getElementById('pc').value),
+                envio_pago: parseFloat(document.getElementById('env').value),
+                precio_venta: parseFloat(document.getElementById('pv').value),
+                unidades: parseInt(document.getElementById('uni').value)
+            };
+            await fetch('/api/nuevo', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            fetchData();
         }
 
-        async function vender(id) { await fetch(`/api/vender/${id}`, {method:'PUT'}); cargarDatos(); }
-        async function eliminar(id) { if(confirm('¿Borrar?')) { await fetch(`/api/eliminar/${id}`, {method:'DELETE'}); cargarDatos(); } }
+        async function eliminarVenta(id) {
+            if(confirm("¿Eliminar este registro financiero?")) {
+                await fetch(`/api/eliminar/${id}`, { method: 'DELETE' });
+                fetchData();
+            }
+        }
     </script>
 </body>
 </html>
