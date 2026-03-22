@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>V-MASTER | Cloud Intelligence</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #050608; --card: #12151c; --accent: #00d4ff; --success: #00ffa3; --danger: #ff4d4d; --warning: #ffaa00; --text: #f0f6fc; --border: #262c36; }
+        body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 20px; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .logo { font-size: 1.5rem; font-weight: 800; } .logo span { color: var(--accent); }
+        
+        .grid-main { display: grid; grid-template-columns: 350px 1fr; gap: 20px; }
+        .card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 20px; }
+        
+        /* Monitor DAC7 */
+        .dac7-box { background: var(--card); border: 1px solid var(--border); padding: 15px 25px; border-radius: 20px; margin-bottom: 20px; display: flex; align-items: center; }
+        .progress-bg { flex: 1; margin: 0 20px; background: #1c2128; height: 8px; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; transition: 1s ease; width: 0%; }
+
+        /* Stats */
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: var(--card); padding: 15px; border-radius: 15px; border: 1px solid var(--border); text-align: center; }
+        
+        input, select { background: #080a0d; border: 1px solid var(--border); color: white; padding: 12px; border-radius: 10px; width: 100%; margin: 5px 0; box-sizing: border-box; font-family: inherit; }
+        button { border: none; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; transition: 0.2s; font-family: inherit; }
+        .btn-main { background: var(--accent); color: #000; width: 100%; cursor: pointer; }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
+        tr.item td { padding: 12px 8px; border-bottom: 1px solid var(--border); }
+        .badge { background: rgba(0, 212, 255, 0.1); color: var(--accent); padding: 3px 7px; border-radius: 5px; font-size: 0.65rem; font-weight: bold; }
+        
+        @keyframes pulse { 50% { opacity: 0.5; } }
+        .danger-msg { animation: pulse 1s infinite; color: var(--danger); }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div class="logo">V-MASTER <span>CLOUD</span></div>
+        <div id="sync-status" style="font-size: 0.7rem; color: var(--success);">● CONECTADO A SUPABASE</div>
+    </div>
+
+    <div class="dac7-box">
+        <div style="min-width: 140px;">
+            <div id="dac-status" style="font-weight: 800; font-size: 0.8rem; color: var(--success);">CUENTA SEGURA</div>
+            <div id="cuenta-activa" style="font-size: 0.6rem; color: #8b949e;">Selecciona una cuenta</div>
+        </div>
+        <div class="progress-bg"><div id="dac-bar" class="progress-fill" style="background: var(--success);"></div></div>
+        <div id="dac-text" style="font-weight: 800; font-size: 0.8rem; text-align: right; min-width: 120px;">0€ | 0/30 vtas</div>
+    </div>
+
+    <div class="grid-main">
+        <div class="card">
+            <h3 style="margin-top:0">Nueva Entrada</h3>
+            <label style="font-size: 0.7rem; color: #8b949e;">ASIGNAR A CUENTA GMAIL:</label>
+            <select id="select-cuenta" onchange="actualizarVistaCuenta()">
+                </select>
+            
+            <input type="text" id="art" placeholder="Producto (Ej: Zapas TN, Polo...)">
+            <input type="number" id="pc" placeholder="Coste Compra (€)">
+            <input type="number" id="env" placeholder="Gasto Envío/Gestión (€)">
+            <input type="number" id="pv" placeholder="Precio Venta Final (€)">
+            <input type="number" id="uni" placeholder="Unidades" value="1">
+            
+            <button class="btn-main" onclick="guardarProducto()">SUBIR A LA NUBE</button>
+            
+            <div style="margin-top:20px; padding:15px; background:rgba(0,212,255,0.05); border-radius:15px; border:1px dashed var(--accent)">
+                <div style="font-size: 0.6rem; font-weight: 800; color: var(--accent);">BENEFICIO POR PRODUCTO</div>
+                <div id="calc-neto" style="font-size: 1.2rem; font-weight: 800; color: var(--success); margin-top:5px;">0.00€</div>
+            </div>
+        </div>
+
+        <div>
+            <div class="stats-row">
+                <div class="stat-card"><div>Ventas Globales</div><span id="s-ventas" style="font-size:1.5rem; font-weight:800">0</span></div>
+                <div class="stat-card"><div>Caja Total</div><span id="s-caja" style="font-size:1.5rem; font-weight:800">0€</span></div>
+                <div class="stat-card"><div>Beneficio Neto</div><span id="s-neto" style="font-size:1.5rem; font-weight:800; color:var(--success)">0€</span></div>
+            </div>
+
+            <div class="card">
+                <h4 style="margin:0 0 15px 0">Inventario en Tiempo Real</h4>
+                <table>
+                    <thead><tr style="color:#8b949e; font-size:0.65rem; text-align: left;">
+                        <th>ARTÍCULO</th><th>GMAIL</th><th>INVERSIÓN</th><th>VENTA</th><th>ACCION</th>
+                    </tr></thead>
+                    <tbody id="lista-productos"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let globalData = [];
+        let cuentasDisponibles = [];
+
+        async function inicializar() {
+            await cargarCuentas();
+            await cargarDatos();
+        }
+
+        async function cargarCuentas() {
+            const res = await fetch('/api/cuentas');
+            cuentasDisponibles = await res.json();
+            const select = document.getElementById('select-cuenta');
+            select.innerHTML = cuentasDisponibles.map(c => 
+                `<option value="${c.id}">${c.nombre_gmail}</option>`
+            ).join('');
+        }
+
+        async function cargarDatos() {
+            const res = await fetch('/api/datos');
+            globalData = await res.json();
+            
+            let v_total = 0, caja_total = 0, neto_total = 0;
+
+            const tabla = document.getElementById('lista-productos');
+            tabla.innerHTML = globalData.map(p => {
+                const totalCoste = (p.precio_compra + p.envio_pago) * p.unidades;
+                const tasaVinted = (p.precio_venta * 0.05) + 0.70;
+                const netoItem = (p.precio_venta - tasaVinted - (p.precio_compra + p.envio_pago)) * p.unidades;
+
+                if(p.estado === 'Vendido') {
+                    v_total += p.unidades;
+                    caja_total += (p.precio_venta * p.unidades);
+                    neto_total += netoItem;
+                }
+
+                return `<tr class="item">
+                    <td><b>${p.articulo}</b><br><small style="color:#8b949e">${p.unidades} uds</small></td>
+                    <td><span class="badge">${p.cuentas ? p.cuentas.nombre_gmail : 'Sin asignar'}</span></td>
+                    <td>${totalCoste.toFixed(2)}€</td>
+                    <td style="color:var(--success)">${p.precio_venta.toFixed(2)}€</td>
+                    <td>
+                        ${p.estado === 'Stock' ? 
+                        `<button onclick="vender(${p.id})" style="background:var(--success); color:#000; padding:4px 8px; font-size:0.7rem; border-radius:5px;">VENDER</button>` : 
+                        '<span style="color:var(--success); font-weight:bold;">VENDIDO</span>'}
+                    </td>
+                </tr>`;
+            }).join('');
+
+            document.getElementById('s-ventas').innerText = v_total;
+            document.getElementById('s-caja').innerText = caja_total.toFixed(2) + '€';
+            document.getElementById('s-neto').innerText = neto_total.toFixed(2) + '€';
+            
+            actualizarVistaCuenta();
+        }
+
+        function actualizarVistaCuenta() {
+            const cuentaId = document.getElementById('select-cuenta').value;
+            const cuentaNombre = document.getElementById('select-cuenta').options[document.getElementById('select-cuenta').selectedIndex].text;
+            
+            // Filtrar solo las ventas de la cuenta seleccionada para el radar DAC7
+            const ventasCuenta = globalData.filter(p => p.id_cuenta == cuentaId && p.estado === 'Vendido');
+            const numVentas = ventasCuenta.reduce((acc, p) => acc + p.unidades, 0);
+            const totalDinero = ventasCuenta.reduce((acc, p) => acc + (p.precio_venta * p.unidades), 0);
+
+            // Actualizar Radar
+            const pVentas = (numVentas / 30) * 100;
+            const pDinero = (totalDinero / 2000) * 100;
+            const pReal = Math.max(pVentas, pDinero);
+
+            const bar = document.getElementById('dac-bar');
+            bar.style.width = Math.min(pReal, 100) + '%';
+            document.getElementById('dac-text').innerText = `${totalDinero.toFixed(0)}€ | ${numVentas}/30 vtas`;
+            document.getElementById('cuenta-activa').innerText = "Vigilando: " + cuentaNombre;
+
+            const status = document.getElementById('dac-status');
+            if(pReal >= 85) {
+                status.innerText = "🚨 PELIGRO DAC7";
+                status.className = "danger-msg";
+                bar.style.background = 'var(--danger)';
+            } else {
+                status.innerText = "CUENTA SEGURA";
+                status.className = "";
+                bar.style.background = 'var(--success)';
+            }
+        }
+
+        async function guardarProducto() {
+            const btn = event.target;
+            btn.disabled = true;
+            btn.innerText = "SUBIENDO...";
+
+            const data = {
+                articulo: document.getElementById('art').value,
+                id_cuenta: document.getElementById('select-cuenta').value,
+                p_compra: parseFloat(document.getElementById('pc').value) || 0,
+                envio: parseFloat(document.getElementById('env') .value) || 0,
+                p_venta: parseFloat(document.getElementById('pv').value) || 0,
+                unidades: parseInt(document.getElementById('uni').value) || 1
+            };
+
+            await fetch('/api/nuevo', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+
+            // Limpiar y recargar
+            document.getElementById('art').value = "";
+            btn.disabled = false;
+            btn.innerText = "SUBIR A LA NUBE";
+            cargarDatos();
+        }
+
+        async function vender(id) {
+            await fetch(`/api/vender/${id}`, { method: 'PUT' });
+            new Audio('https://www.soundjay.com/misc/sounds/cash-register-05.mp3').play().catch(()=>{});
+            cargarDatos();
+        }
+
+        inicializar();
+    </script>
+</body>
+</html>
