@@ -21,21 +21,14 @@ app.get('/api/datos', async (req, res) => {
 });
 
 app.post('/api/nuevo', async (req, res) => {
-    const { articulo, id_cuenta, precio_compra, envio_pago, precio_venta, unidades } = req.body;
-    const { error } = await supabase.from('inventario').insert([
-        { 
-            articulo, 
-            id_cuenta, 
-            precio_compra, 
-            envio_pago, 
-            precio_venta, 
-            unidades, 
-            estado: 'Vendido', 
-            fecha_venta: new Date().toISOString() 
-        }
-    ]);
-    if (error) return res.status(500).json(error);
-    res.json({ status: "ok" });
+    try {
+        const { error } = await supabase.from('inventario').insert([req.body]);
+        if (error) throw error;
+        res.json({ status: "ok" });
+    } catch (err) {
+        console.error("Error en el insert:", err);
+        res.status(500).json(err);
+    }
 });
 
 app.delete('/api/eliminar/:id', async (req, res) => {
