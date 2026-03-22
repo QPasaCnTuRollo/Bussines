@@ -10,49 +10,34 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-// OBTENER CUENTAS
+// Obtener Cuentas
 app.get('/api/cuentas', async (req, res) => {
-    const { data, error } = await supabase.from('cuentas').select('*');
-    if (error) return res.status(500).json(error);
+    const { data } = await supabase.from('cuentas').select('*');
     res.json(data);
 });
 
-// OBTENER DATOS INVENTARIO
+// Obtener el historial de ventas (todo lo registrado)
 app.get('/api/datos', async (req, res) => {
-    const { data, error } = await supabase.from('inventario').select(`*, cuentas(nombre_gmail)`).order('id', { ascending: false });
-    if (error) return res.status(500).json(error);
+    const { data } = await supabase.from('inventario').select(`*, cuentas(nombre_gmail)`).order('id', { ascending: false });
     res.json(data);
 });
 
-// NUEVO PRODUCTO
+// Registrar nueva venta (Gestor directo)
 app.post('/api/nuevo', async (req, res) => {
-    const { error } = await supabase.from('inventario').insert([req.body]);
-    if (error) return res.status(500).json(error);
+    const { articulo, id_cuenta, precio_compra, envio_pago, precio_venta, unidades } = req.body;
+    const { data, error } = await supabase.from('inventario').insert([
+        { articulo, id_cuenta, precio_compra, envio_pago, precio_venta, unidades, estado: 'Vendido', fecha_venta: new Date().toISOString() }
+    ]);
     res.json({ status: "ok" });
 });
 
-// EDITAR PRODUCTO
-app.put('/api/editar/:id', async (req, res) => {
-    const { error } = await supabase.from('inventario').update(req.body).eq('id', req.params.id);
-    if (error) return res.status(500).json(error);
-    res.json({ status: "ok" });
-});
-
-// ELIMINAR PRODUCTO
+// Borrar registro
 app.delete('/api/eliminar/:id', async (req, res) => {
-    const { error } = await supabase.from('inventario').delete().eq('id', req.params.id);
-    if (error) return res.status(500).json(error);
-    res.json({ status: "ok" });
-});
-
-// VENDER PRODUCTO
-app.put('/api/vender/:id', async (req, res) => {
-    const { error } = await supabase.from('inventario').update({ estado: 'Vendido', fecha_venta: new Date().toISOString() }).eq('id', req.params.id);
-    if (error) return res.status(500).json(error);
+    await supabase.from('inventario').delete().eq('id', req.params.id);
     res.json({ status: "ok" });
 });
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => console.log("Servidor V-Master Live"));
+app.listen(PORT, '0.0.0.0', () => console.log("V-Masters Core Online"));
