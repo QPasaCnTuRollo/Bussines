@@ -22,11 +22,19 @@ app.get('/api/datos', async (req, res) => {
 
 app.post('/api/nuevo', async (req, res) => {
     try {
-        const { error } = await supabase.from('inventario').insert([req.body]);
+        // Forzamos el formato de los números para evitar errores de tipo en Supabase
+        const venta = {
+            ...req.body,
+            precio_compra: parseFloat(req.body.precio_compra),
+            envio_pago: parseFloat(req.body.envio_pago),
+            precio_venta: parseFloat(req.body.precio_venta),
+            id_cuenta: parseInt(req.body.id_cuenta)
+        };
+        const { error } = await supabase.from('inventario').insert([venta]);
         if (error) throw error;
         res.json({ status: "ok" });
     } catch (err) {
-        console.error("Error en el insert:", err);
+        console.error(err);
         res.status(500).json(err);
     }
 });
@@ -39,4 +47,4 @@ app.delete('/api/eliminar/:id', async (req, res) => {
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => console.log("V-Masters Online"));
+app.listen(PORT, '0.0.0.0', () => console.log("Servidor V-Masters Activo"));
