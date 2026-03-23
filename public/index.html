@@ -1234,10 +1234,9 @@ body::before {
 
       <div class="logistics-divider"></div>
 
-      <div class="logistics-total">
-        <div class="logistics-stat-label">TOTAL INVERTIDO</div>
-        <div class="logistics-stat-val highlight" id="log-invertido">0€</div>
-        <div class="logistics-stat-label" style="margin-top:8px">COSTE STOCK + ENVÍOS</div>
+      <div class="logistics-stat">
+        <div class="logistics-stat-label">TOTAL INVERTIDO (€)</div>
+        <input class="input-field" type="number" id="inp-invertido" placeholder="0.00" min="0" step="0.01" oninput="updateCosts()" style="margin-top:6px">
       </div>
     </div>
 
@@ -1471,7 +1470,8 @@ async function saveProduct() {
 function render() {
   const idC    = document.getElementById('sel-cuenta').value;
   const filter = sales.filter(s => String(s.id_cuenta) === String(idC));
-  const envio  = parseFloat(document.getElementById('inp-envio').value) || 0;
+  const envio      = parseFloat(document.getElementById('inp-envio').value) || 0;
+  const invertido  = parseFloat(document.getElementById('inp-invertido').value) || 0;
 
   // — Product list —
   const list = document.getElementById('product-list');
@@ -1494,13 +1494,10 @@ function render() {
   }
 
   // — Stats —
-  let totalVenta = 0, totalCost = 0;
-  filter.forEach(s => {
-    totalVenta += parseFloat(s.precio_venta) || 0;
-    totalCost  += parseFloat(s.precio_compra) || 0;
-  });
+  let totalVenta = 0;
+  filter.forEach(s => { totalVenta += parseFloat(s.precio_venta) || 0; });
 
-  const totalInvertido = totalCost + envio;
+  const totalInvertido = invertido + envio;
   const beneficio      = totalVenta - totalInvertido;
   const enProfit       = totalVenta > totalInvertido && filter.length > 0;
 
@@ -1515,7 +1512,6 @@ function render() {
 
   // — Logistics —
   document.getElementById('log-productos').textContent = filter.length;
-  document.getElementById('log-invertido').textContent = totalInvertido.toFixed(2) + '€';
 
   // — DAC7 —
   updateDac7(filter.length, totalVenta);
@@ -1722,6 +1718,7 @@ function askReset() {
   openConfirm('RESETEAR CUENTA', 'Se eliminarán TODOS los registros de la cuenta seleccionada. ¿Seguro?', async () => {
     await fetch(`/api/reset-cuenta/${id}`, { method:'DELETE' });
     document.getElementById('inp-envio').value = '';
+    document.getElementById('inp-invertido').value = '';
     showToast('Cuenta reseteada');
     fetchData();
   });
