@@ -2,46 +2,58 @@ const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
 const path = require('path');
 const cors = require('cors');
+
 const app = express();
 
+// Configuración básica
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+// Verificar variables antes de conectar para evitar que el servidor explote
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
 
+if (!supabaseUrl || !supabaseKey) {
+    console.error("❌ ERROR: Faltan las variables SUPABASE_URL o SUPABASE_KEY en Render.");
+}
+
+const supabase = createClient(supabaseUrl || '', supabaseKey || '');
+
+// Endpoints
 app.get('/api/cuentas', async (req, res) => {
-    const { data } = await supabase.from('cuentas').select('*');
-    res.json(data || []);
+    try {
+        const { data, error } = await supabase.from('cuentas').select('*');
+        if (error) throw error;
+        res.json(data || []);
+    } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.get('/api/datos', async (req, res) => {
-    const { data } = await supabase.from('inventario').select(`*, cuentas(nombre_gmail)`).order('id', { ascending: false });
-    res.json(data || []);
+    try {
+        const { data, error } = await supabase.from('inventario').select(`*, cuentas(nombre_gmail)`).order('id', { ascending: false });
+        if (error) throw error;
+        res.json(data || []);
+    } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.post('/api/nuevo', async (req, res) => {
     try {
-        // 🔥 AQUÍ ESTABA EL ERROR: He eliminado 'envio_pago' porque no existe en tu Supabase.
         const venta = {
             articulo: req.body.articulo,
             id_cuenta: parseInt(req.body.id_cuenta),
             precio_compra: parseFloat(req.body.precio_compra) || 0,
             precio_venta: parseFloat(req.body.precio_venta) || 0,
-            unidades: 1, // Si esta columna tampoco existe en tu Supabase y te da error, dímelo y la quitamos también.
+            unidades: 1,
             estado: 'Vendido',
             fecha_venta: new Date().toISOString()
         };
 
         const { error } = await supabase.from('inventario').insert([venta]);
+        if (error) return res.status(400).json({ detalle: error.message });
         
-        if (error) {
-            console.error("Fallo Supabase:", error);
-            return res.status(400).json({ detalle: error.message });
-        }
         res.json({ status: "ok" });
     } catch (err) {
-        console.error("Error de servidor:", err);
         res.status(500).json({ detalle: err.message });
     }
 });
@@ -51,15 +63,15 @@ app.delete('/api/eliminar/:id', async (req, res) => {
     res.json({ status: "ok" });
 });
 
-app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => console.log("Servidor V-Masters Activo"));
-app.delete('/api/eliminar/:id', async (req, res) => {
-    await supabase.from('inventario').delete().eq('id', req.params.id);
-    res.json({ status: "ok" });
+// Servir el HTML
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Servidor V-Masters corriendo en puerto ${PORT}`);
+});
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
 const PORT = process.env.PORT || 3000;
