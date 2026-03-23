@@ -9,46 +9,42 @@
         :root { --bg: #020305; --card: #0a0c10; --accent: #00e5ff; --success: #00ff9d; --danger: #ff3366; --text: #e1e4e8; --border: rgba(255,255,255,0.08); }
         body, html { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; }
 
-        /* HEADER & LOGO ILUMINADO */
-        .main-header { text-align: center; padding: 20px 0; position: relative; }
+        /* HEADER & LOGO */
+        .main-header { text-align: center; padding: 10px 0; }
         .vmaster-logo { 
             font-size: 3.5rem; font-weight: 900; letter-spacing: 15px; color: #fff; 
             text-shadow: 0 0 20px var(--accent), 0 0 40px var(--accent); margin: 0;
             text-transform: uppercase;
         }
-
-        /* DAC7 RADAR CENTRAL (MÁXIMA PRIORIDAD) */
-        .dac7-hero {
-            width: 500px; margin: 10px auto 30px; background: rgba(255,255,255,0.03); 
-            padding: 15px 25px; border-radius: 20px; border: 1px solid var(--border);
-            position: relative; overflow: hidden;
-        }
-        .dac-bar-bg { height: 8px; background: #000; border-radius: 10px; margin: 10px 0; position: relative; }
-        #dac-fill { height: 100%; width: 0%; background: var(--success); box-shadow: 0 0 15px var(--success); transition: 1.5s; }
-        .dac-alert-glow { animation: alert-pulse 1s infinite alternate; color: var(--danger) !important; font-weight: 900; }
-        @keyframes alert-pulse { from { opacity: 0.4; text-shadow: 0 0 0px var(--danger); } to { opacity: 1; text-shadow: 0 0 15px var(--danger); } }
-
-        /* LAYOUT */
-        #main-content { display: none; padding: 0 30px 30px; height: 100vh; }
-        .grid-3 { display: grid; grid-template-columns: 350px 1fr 300px; gap: 20px; height: calc(100vh - 250px); }
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 25px; padding: 20px; position: relative; }
-
-        /* IN PROFIT REUBICADO */
-        .profit-label { 
-            display: none; font-size: 0.7rem; font-weight: 900; color: #000; 
-            background: var(--success); padding: 2px 10px; border-radius: 10px;
-            margin: 5px auto 0; width: fit-content; text-transform: uppercase;
-        }
-
-        /* INPUTS & BTNS */
-        input, select { background: #000; border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 12px; width: 100%; margin-top: 10px; font-family: inherit; }
-        .btn-core { background: var(--accent); color: #000; border: none; padding: 14px; border-radius: 12px; font-weight: 900; width: 100%; cursor: pointer; margin-top: 15px; }
-        .btn-reset { background: none; border: 1px solid var(--danger); color: var(--danger); font-size: 0.65rem; padding: 8px; border-radius: 10px; cursor: pointer; margin-top: 10px; width: 100%; font-weight: 700; opacity: 0.6; }
-        .btn-reset:hover { opacity: 1; background: var(--danger); color: #fff; }
-
+        .date-display { font-family: 'JetBrains Mono'; color: #666; font-size: 0.9rem; margin-top: 5px; }
+        .date-display b { color: var(--accent); }
         .clock { position: absolute; top: 30px; right: 40px; font-family: 'JetBrains Mono'; font-size: 1.2rem; opacity: 0.6; }
 
-        /* LOGIN & TRANSITION (Igual a la anterior por profesionalismo) */
+        /* DAC7 RADAR */
+        .dac7-hero {
+            width: 500px; margin: 15px auto 25px; background: rgba(255,255,255,0.03); 
+            padding: 15px 25px; border-radius: 20px; border: 1px solid var(--border);
+        }
+        .dac-bar-bg { height: 8px; background: #000; border-radius: 10px; margin: 10px 0; overflow: hidden; }
+        #dac-fill { height: 100%; width: 0%; background: var(--success); box-shadow: 0 0 15px var(--success); transition: 1.5s; }
+        .dac-alert-glow { animation: alert-pulse 1s infinite alternate; color: var(--danger) !important; }
+        @keyframes alert-pulse { from { opacity: 0.5; } to { opacity: 1; text-shadow: 0 0 10px var(--danger); } }
+
+        /* GRID */
+        #main-content { display: none; padding: 0 30px 30px; height: 100vh; }
+        .grid-3 { display: grid; grid-template-columns: 350px 1fr 320px; gap: 20px; height: calc(100vh - 280px); }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 25px; padding: 20px; position: relative; }
+
+        /* BOTONES */
+        input, select { background: #000; border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 12px; width: 100%; margin-top: 10px; }
+        .btn-core { background: var(--accent); color: #000; border: none; padding: 14px; border-radius: 12px; font-weight: 900; width: 100%; cursor: pointer; margin-top: 15px; text-transform: uppercase; }
+        .btn-danger { background: var(--danger); color: #fff; border: none; padding: 14px; border-radius: 12px; font-weight: 900; width: 100%; cursor: pointer; margin-top: 15px; text-transform: uppercase; }
+        .btn-outline-danger { background: none; border: 1px solid var(--danger); color: var(--danger); padding: 12px; border-radius: 12px; width: 100%; cursor: pointer; margin-top: 20px; font-weight: 700; font-size: 0.75rem; }
+        .btn-outline-danger:hover { background: var(--danger); color: #fff; }
+
+        .profit-label { display: none; font-size: 0.7rem; font-weight: 900; color: #000; background: var(--success); padding: 2px 10px; border-radius: 10px; margin: 5px auto 0; width: fit-content; }
+
+        /* LOGIN */
         #login-screen { position: fixed; inset: 0; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 10000; }
         #welcome-transition { position: fixed; inset: 0; background: var(--bg); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
         .logo-big { width: 220px; height: 220px; border-radius: 45px; border: 1px solid var(--accent); opacity: 0; margin: 0 30px; transition: 1s; }
@@ -59,9 +55,9 @@
     <div id="login-screen">
         <div style="background:var(--card); padding:50px; border-radius:40px; border:1px solid var(--border); text-align:center; width:350px">
             <h1 style="letter-spacing:10px; color:var(--accent)">V-MASTER</h1>
-            <input type="text" id="user" placeholder="ID">
-            <input type="password" id="pass" placeholder="KEY">
-            <button class="btn-core" onclick="handleLogin()">ACCESS</button>
+            <input type="text" id="user" placeholder="USUARIO">
+            <input type="password" id="pass" placeholder="CLAVE">
+            <button class="btn-core" onclick="handleLogin()">ENTRAR</button>
         </div>
     </div>
 
@@ -70,7 +66,7 @@
             <img src="logo1.png" id="l1" class="logo-big">
             <img src="logo2.png" id="l2" class="logo-big">
         </div>
-        <h2 style="color:var(--accent); letter-spacing:10px; margin-top:40px; font-size:0.8rem">SYSTEM_INITIALIZING</h2>
+        <h2 style="color:var(--accent); letter-spacing:10px; margin-top:40px; font-size:0.8rem">SISTEMA_INICIANDO</h2>
     </div>
 
     <div id="main-content">
@@ -78,72 +74,60 @@
         
         <header class="main-header">
             <h1 class="vmaster-logo">V-MASTER</h1>
+            <div class="date-display" id="full-date">00 DE MES DE 2026</div>
             
             <div class="dac7-hero">
                 <div style="display:flex; justify-content:space-between; font-size:0.7rem; font-weight:900">
-                    <span>DAC7 COMPLIANCE RADAR</span>
-                    <span id="dac-status">STATUS: SECURE</span>
+                    <span>RADAR DE CUMPLIMIENTO DAC7</span>
+                    <span id="dac-status">ESTADO: SEGURO</span>
                 </div>
-                <div class="dac-bar-bg">
-                    <div id="dac-fill"></div>
-                </div>
-                <div id="dac-text" style="font-family:'JetBrains Mono'; font-size:0.75rem; color:#666">0 / 30 SALES | 0.00 / 2000.00€</div>
+                <div class="dac-bar-bg"><div id="dac-fill"></div></div>
+                <div id="dac-text" style="font-family:'JetBrains Mono'; font-size:0.75rem; color:#666">0 / 30 VENTAS | 0.00€</div>
             </div>
         </header>
 
         <div class="grid-3">
             <div class="card">
+                <h4 style="margin:0; font-size:0.7rem; color:#444">AÑADIR PRODUCTO</h4>
                 <select id="sel-cuenta" onchange="fetchData()"></select>
-                <input type="text" id="art" placeholder="PRODUCT NAME">
-                <input type="number" id="pc" placeholder="BUY PRICE (€)">
-                <input type="number" id="pv" placeholder="SALE PRICE (€)">
-                <button class="btn-core" onclick="save()">UPLOAD TO CLOUD</button>
-                
-                <div style="margin-top:20px; height:200px; overflow-y:auto; font-size:0.8rem">
+                <input type="text" id="art" placeholder="NOMBRE DEL ARTÍCULO">
+                <input type="number" id="pc" placeholder="COSTE (€)">
+                <input type="number" id="pv" placeholder="VENTA VINTED (€)">
+                <button class="btn-core" onclick="save()">REGISTRAR VENTA</button>
+                <div style="margin-top:20px; height:180px; overflow-y:auto; font-size:0.8rem">
                     <table style="width:100%"><tbody id="history"></tbody></table>
                 </div>
-
-                <button class="btn-reset" onclick="resetMaster()">RESET CUENTA (EMPEZAR DE NUEVO)</button>
             </div>
 
             <div class="card">
                 <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:15px; text-align:center; margin-bottom:20px">
-                    <div>
-                        <small style="color:#555">GROSS REVENUE</small><br>
-                        <span id="t-ganado" style="font-size:1.5rem; font-weight:900">0€</span>
-                        <div id="profit-tag" class="profit-label">IN PROFIT</div>
-                    </div>
-                    <div>
-                        <small style="color:#555">TOTAL INVESTMENT</small><br>
-                        <span id="t-invertido" style="font-size:1.5rem; font-weight:900; color:var(--danger)">0€</span>
-                    </div>
-                    <div>
-                        <small style="color:#555">NET MARGIN</small><br>
-                        <span id="t-beneficio" style="font-size:1.5rem; font-weight:900; color:var(--success)">0€</span>
-                    </div>
+                    <div><small>INGRESOS</small><br><span id="t-ganado" style="font-size:1.5rem; font-weight:900">0€</span><div id="profit-tag" class="profit-label">EN BENEFICIO</div></div>
+                    <div><small>INVERSIÓN</small><br><span id="t-invertido" style="font-size:1.5rem; font-weight:900; color:var(--danger)">0€</span></div>
+                    <div><small>NETO</small><br><span id="t-beneficio" style="font-size:1.5rem; font-weight:900; color:var(--success)">0€</span></div>
                 </div>
                 <div style="height:320px"><canvas id="mainChart"></canvas></div>
             </div>
 
             <div class="card">
-                <h4 style="margin:0; color:var(--danger); font-size:0.7rem; letter-spacing:2px">GLOBAL LOGISTICS</h4>
-                <input type="number" id="global-inv" placeholder="STOCK COST (€)">
-                <input type="number" id="global-env" placeholder="SHIPPING COSTS (€)">
-                <button class="btn-core" style="background:var(--danger); color:#fff" onclick="updateCosts()">SYNC BALANCE</button>
+                <h4 style="margin:0; color:var(--danger); font-size:0.7rem">LOGÍSTICA Y CONTROL</h4>
+                <input type="number" id="global-inv" placeholder="INVERSIÓN STOCK (€)">
+                <input type="number" id="global-env" placeholder="GASTOS ENVÍO (€)">
+                <button class="btn-danger" onclick="updateCosts()">SINCRO BALANCE</button>
                 
-                <div style="margin-top:30px; padding-top:20px; border-top:1px solid var(--border)">
-                    <button class="btn-core" style="background:none; border:1px solid #333; color:#555" onclick="location.reload()">LOGOUT</button>
+                <div style="margin-top:25px; border-top:1px solid var(--border); padding-top:10px">
+                    <button class="btn-outline-danger" onclick="resetMaster()">⚠️ ELIMINAR TODO (RESET CUENTA)</button>
+                    <button class="btn-core" style="background:none; border:1px solid #333; color:#555" onclick="location.reload()">CERRAR SESIÓN</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const CONFIG = { u: "QPasaCnTuRollo", p: "3F@guqu3" };
+        const AUTH = { u: "QPasaCnTuRollo", p: "3F@guqu3" };
         let sales = [], mainChart = null;
 
         function handleLogin() {
-            if(document.getElementById('user').value === CONFIG.u && document.getElementById('pass').value === CONFIG.p) {
+            if(document.getElementById('user').value === AUTH.u && document.getElementById('pass').value === AUTH.p) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('welcome-transition').style.display = 'flex';
                 setTimeout(() => document.getElementById('l1').style.opacity = '1', 600);
@@ -152,13 +136,15 @@
                     document.getElementById('welcome-transition').style.display = 'none';
                     document.getElementById('main-content').style.display = 'block';
                     init();
-                }, 3500);
+                }, 3000);
             }
         }
 
         setInterval(() => {
             const n = new Date();
             document.getElementById('clock').innerText = n.toLocaleTimeString('es-ES');
+            const meses = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+            document.getElementById('full-date').innerHTML = `${n.getDate()} DE <b>${meses[n.getMonth()]}</b> DE ${n.getFullYear()}`;
         }, 1000);
 
         async function init() {
@@ -174,6 +160,13 @@
             render();
         }
 
+        async function resetMaster() {
+            if(!confirm("¿ESTÁS SEGURO? Se borrarán todos los productos de esta cuenta para empezar de cero.")) return;
+            const id = document.getElementById('sel-cuenta').value;
+            await fetch(`/api/reset-cuenta/${id}`, { method: 'DELETE' });
+            fetchData();
+        }
+
         function updateCosts() {
             const id = document.getElementById('sel-cuenta').value;
             localStorage.setItem(`vm_${id}`, JSON.stringify({
@@ -181,13 +174,6 @@
                 env: document.getElementById('global-env').value
             }));
             render();
-        }
-
-        async function resetMaster() {
-            if(!confirm("¿BORRAR TODO EL HISTORIAL DE ESTA CUENTA PARA EMPEZAR DE NUEVO?")) return;
-            const id = document.getElementById('sel-cuenta').value;
-            await fetch(`/api/reset-cuenta/${id}`, { method: 'DELETE' });
-            fetchData();
         }
 
         function render() {
@@ -198,20 +184,16 @@
             document.getElementById('global-inv').value = saved.inv;
             document.getElementById('global-env').value = saved.env;
 
-            let totalV = 0;
-            let labels = [], dataV = [], dataI = [];
+            let totalV = 0, labels = [], dataV = [], dataI = [];
             const invG = (parseFloat(saved.inv) || 0) + (parseFloat(saved.env) || 0);
 
             document.getElementById('history').innerHTML = [...filtered].reverse().map(s => {
                 totalV += s.precio_venta;
-                return `<tr><td>${s.articulo}</td><td style="color:var(--success)">+${s.precio_venta}€</td></tr>`;
+                return `<tr style="border-bottom:1px solid #111"><td>${s.articulo}</td><td style="color:var(--success); text-align:right">+${s.precio_venta}€</td></tr>`;
             }).join('');
 
             let acc = 0;
-            filtered.forEach((s, i) => {
-                acc += s.precio_venta;
-                labels.push(i+1); dataV.push(acc); dataI.push(invG);
-            });
+            filtered.forEach((s, i) => { acc += s.precio_venta; labels.push(i+1); dataV.push(acc); dataI.push(invG); });
 
             const neto = totalV - invG;
             document.getElementById('t-ganado').innerText = totalV.toFixed(2) + "€";
@@ -219,23 +201,14 @@
             document.getElementById('t-beneficio').innerText = neto.toFixed(2) + "€";
             document.getElementById('profit-tag').style.display = neto > 0 ? 'block' : 'none';
 
-            // DAC7 RADAR CENTRAL
             const count = filtered.length;
             const p = Math.min(Math.max((count/30)*100, (totalV/2000)*100), 100);
-            const fill = document.getElementById('dac-fill');
-            const status = document.getElementById('dac-status');
-            fill.style.width = p + "%";
-            document.getElementById('dac-text').innerText = `${count} / 30 SALES | ${totalV.toFixed(2)} / 2000.00€`;
+            document.getElementById('dac-fill').style.width = p + "%";
+            document.getElementById('dac-text').innerText = `${count} / 30 VENTAS | ${totalV.toFixed(2)}€`;
             
-            if(p > 80) {
-                status.innerText = "STATUS: CRITICAL LIMIT";
-                status.className = "dac-alert-glow";
-                fill.style.background = "var(--danger)";
-            } else {
-                status.innerText = "STATUS: SECURE";
-                status.className = "";
-                fill.style.background = "var(--success)";
-            }
+            const st = document.getElementById('dac-status');
+            if(p > 80) { st.innerText = "ESTADO: LÍMITE CRÍTICO"; st.className = "dac-alert-glow"; document.getElementById('dac-fill').style.background = "var(--danger)"; }
+            else { st.innerText = "ESTADO: SEGURO"; st.className = ""; document.getElementById('dac-fill').style.background = "var(--success)"; }
 
             const ctx = document.getElementById('mainChart').getContext('2d');
             if(mainChart) mainChart.destroy();
@@ -244,8 +217,8 @@
                 data: {
                     labels,
                     datasets: [
-                        { label: 'Revenue', data: dataV, borderColor: '#00e5ff', backgroundColor: 'rgba(0, 229, 255, 0.1)', fill: true, tension: 0.4 },
-                        { label: 'Investment', data: dataI, borderColor: '#ff3366', borderDash: [5, 5], pointRadius: 0, fill: false }
+                        { label: 'Ingresos', data: dataV, borderColor: '#00e5ff', backgroundColor: 'rgba(0, 229, 255, 0.1)', fill: true, tension: 0.4 },
+                        { label: 'Inversión', data: dataI, borderColor: '#ff3366', borderDash: [5, 5], pointRadius: 0, fill: false }
                     ]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { display: false } } }
