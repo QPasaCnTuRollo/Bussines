@@ -22,20 +22,28 @@ app.get('/api/datos', async (req, res) => {
 
 app.post('/api/nuevo', async (req, res) => {
     try {
-        // Forzamos el formato de los números para evitar errores de tipo en Supabase
         const venta = {
-            ...req.body,
-            precio_compra: parseFloat(req.body.precio_compra),
-            envio_pago: parseFloat(req.body.envio_pago),
-            precio_venta: parseFloat(req.body.precio_venta),
-            id_cuenta: parseInt(req.body.id_cuenta)
+            articulo: req.body.articulo,
+            id_cuenta: parseInt(req.body.id_cuenta),
+            precio_compra: parseFloat(req.body.precio_compra) || 0,
+            precio_venta: parseFloat(req.body.precio_venta) || 0,
+            envio_pago: 0, // Lo enviamos a 0 porque ahora el envío es global manual
+            unidades: 1,
+            estado: 'Vendido',
+            fecha_venta: new Date().toISOString()
         };
+
         const { error } = await supabase.from('inventario').insert([venta]);
-        if (error) throw error;
+        
+        // SI HAY ERROR, LO DEVOLVEMOS AL FRONTEND PARA VERLO
+        if (error) {
+            console.error("Fallo Supabase:", error);
+            return res.status(400).json({ detalle: error.message });
+        }
         res.json({ status: "ok" });
     } catch (err) {
-        console.error(err);
-        res.status(500).json(err);
+        console.error("Error de servidor:", err);
+        res.status(500).json({ detalle: err.message });
     }
 });
 
