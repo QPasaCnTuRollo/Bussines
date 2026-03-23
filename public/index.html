@@ -2,156 +2,163 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>V-MASTERS | Terminal</title>
+    <title>V-MASTERS | Terminal Elite</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;800&family=Source+Code+Pro:wght@700&display=swap" rel="stylesheet">
     <style>
         :root { --bg: #050608; --card: #0d0f14; --accent: #00d4ff; --success: #00ffa3; --danger: #ff4d4d; --warning: #ffaa00; --text: #f0f6fc; --border: #1c2128; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; }
 
-        /* LOGIN & TRANSITION */
-        #login-screen { position: fixed; inset: 0; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .login-card { background: var(--card); padding: 40px; border-radius: 25px; border: 1px solid var(--border); width: 320px; text-align: center; }
-        input, select { background: #000; border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 10px; width: 100%; margin-top: 10px; box-sizing: border-box; }
+        /* TRANSICIÓN MEJORADA */
         #welcome-transition { position: fixed; inset: 0; background: var(--bg); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 999; }
-        .scan-laser { position: absolute; width: 100%; height: 4px; background: var(--accent); box-shadow: 0 0 20px var(--accent); top: 0; animation: laserMove 1.5s infinite linear; }
-        .logo-anim { width: 120px; height: 120px; opacity: 0; transform: scale(0.5); transition: 0.8s; border: 1px solid var(--accent); border-radius: 20px; margin: 10px; }
+        .logo-container { display: flex; gap: 30px; align-items: center; justify-content: center; transform: scale(1.4); } /* Logos más grandes */
+        .logo-anim { width: 180px; height: 180px; border: 2px solid var(--accent); border-radius: 30px; opacity: 0; box-shadow: 0 0 30px rgba(0, 212, 255, 0.2); }
+        .scan-laser { position: absolute; width: 100%; height: 5px; background: var(--accent); box-shadow: 0 0 30px var(--accent); top: 0; animation: laserMove 2s infinite linear; }
         @keyframes laserMove { 0%, 100% { top: 0%; } 50% { top: 100%; } }
 
-        /* DASHBOARD LAYOUT */
+        /* PROFIT BADGE */
+        #profit-status { font-size: 0.9rem; padding: 4px 12px; border-radius: 20px; font-weight: 800; display: none; }
+        .is-profit { background: var(--success); color: #000; display: inline-block !important; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+
+        /* MODAL EDICIÓN */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-content { background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid var(--accent); width: 350px; }
+
+        /* GRID & CARDS */
         #main-content { display: none; padding: 20px; height: 100vh; overflow-y: auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .date-display { font-weight: 800; text-transform: uppercase; }
-        .month-big { font-size: 2.2rem; color: var(--accent); margin: 0 10px; }
-        .clock { font-family: 'Source Code Pro'; background: #000; padding: 8px 15px; border-radius: 10px; border: 1px solid var(--border); font-size: 1.2rem; }
-
-        .dac7-radar { background: var(--card); padding: 15px; border-radius: 15px; border: 1px solid var(--border); display: flex; align-items: center; gap: 20px; flex: 1; margin: 0 20px; }
-        .progress-bar { flex: 1; height: 10px; background: #000; border-radius: 5px; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--success); width: 0%; transition: 1s; }
-
-        .grid-3 { display: grid; grid-template-columns: 320px 1fr 300px; gap: 20px; }
-        .card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 20px; }
-        .btn { background: var(--accent); color: #000; border: none; padding: 14px; border-radius: 10px; font-weight: 800; width: 100%; cursor: pointer; margin-top: 15px; }
+        .grid-3 { display: grid; grid-template-columns: 350px 1fr 300px; gap: 20px; }
+        .card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 20px; position: relative; }
+        .btn { background: var(--accent); color: #000; border: none; padding: 12px; border-radius: 10px; font-weight: 800; width: 100%; cursor: pointer; margin-top: 10px; }
+        .btn-edit { background: none; border: 1px solid #333; color: #888; padding: 4px 8px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; }
         
-        .stat-box { background: #000; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
-        .stat-val { font-size: 1.5rem; font-weight: 800; display: block; }
-        
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        th { text-align: left; color: var(--accent); padding-bottom: 10px; }
-        td { padding: 8px 0; border-bottom: 1px solid #1c2128; }
-        .alert-active { color: var(--warning); font-weight: 800; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0; } }
+        .stat-box { background: #000; padding: 15px; border-radius: 15px; text-align: center; border: 1px solid var(--border); }
+        .clock { font-family: 'Source Code Pro'; background: #000; border: 1px solid var(--border); padding: 10px 20px; border-radius: 15px; font-size: 1.4rem; }
     </style>
 </head>
 <body>
 
-    <div id="login-screen">
-        <div class="login-card">
-            <h2>V-MASTERS</h2>
-            <input type="text" id="user" placeholder="USUARIO">
-            <input type="password" id="pass" placeholder="CONTRASEÑA">
-            <button class="btn" onclick="login()">ACCEDER</button>
+    <div id="login-screen" style="position:fixed; inset:0; background:var(--bg); display:flex; justify-content:center; align-items:center; z-index:1000;">
+        <div style="background:var(--card); padding:40px; border-radius:25px; border:1px solid var(--border); text-align:center;">
+            <h2>V-MASTERS TERMINAL</h2>
+            <input type="text" id="user" placeholder="OPERADOR" style="width:100%; padding:10px; margin:10px 0; background:#000; color:#fff; border:1px solid var(--border);">
+            <input type="password" id="pass" placeholder="PASSWORD" style="width:100%; padding:10px; margin:10px 0; background:#000; color:#fff; border:1px solid var(--border);">
+            <button class="btn" onclick="login()">INICIAR SISTEMA</button>
         </div>
     </div>
 
     <div id="welcome-transition">
         <div class="scan-laser"></div>
-        <div style="display:flex">
+        <div class="logo-container">
             <img src="logo1.png" id="l1" class="logo-anim">
             <img src="logo2.png" id="l2" class="logo-anim">
         </div>
-        <h2 style="font-family:'Source Code Pro'; letter-spacing: 10px; color:var(--accent); margin-top:30px">SCANNING DNA...</h2>
+        <h1 style="color:var(--accent); margin-top:50px; letter-spacing:15px; font-family:'Source Code Pro'">DECODIFICANDO...</h1>
+    </div>
+
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="modal-title">Editar</h3>
+            <div id="modal-fields"></div>
+            <button class="btn" onclick="updateItem()">GUARDAR CAMBIOS</button>
+            <button class="btn" style="background:none; color:var(--danger)" onclick="closeModal()">CANCELAR</button>
+        </div>
     </div>
 
     <div id="main-content">
-        <div class="header">
-            <div class="date-display">
-                <span id="day">00</span> <span class="month-big" id="month">MES</span> <span id="year">2026</span>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <div>
+                <span id="day" style="font-size:1.5rem; font-weight:800">00</span>
+                <span id="month" style="font-size:2.5rem; font-weight:800; color:var(--accent); margin:0 10px;">MES</span>
+                <span id="year">2026</span>
             </div>
-
-            <div class="dac7-radar">
-                <div style="font-size:0.7rem"><b>DAC7 RADAR</b><br><span id="dac-status">SEGURO</span></div>
-                <div class="progress-bar"><div id="dac-fill" class="progress-fill"></div></div>
-                <div id="dac-text" style="font-family:'Source Code Pro'; font-size:0.8rem">0/30 | 0€</div>
-            </div>
-
             <div class="clock" id="clock">00:00:00</div>
         </div>
 
         <div class="grid-3">
             <div class="card">
-                <h3 style="margin-top:0">REGISTRO VENTA</h3>
-                <label>Cuenta:</label>
-                <select id="sel-cuenta" onchange="fetchData()"></select>
-                <input type="text" id="art" placeholder="Producto">
-                <input type="number" id="pc" placeholder="Coste Compra (€)">
-                <input type="number" id="pv" placeholder="Precio Venta Vinted (€)">
-                <button class="btn" id="save-btn" onclick="save()">SUBIR A NUBE</button>
+                <div style="display:flex; justify-content:space-between; align-items:center">
+                    <h3 style="margin:0">INVENTARIO</h3>
+                    <button class="btn-edit" onclick="editCuenta()">EDITAR CUENTA</button>
+                </div>
+                <select id="sel-cuenta" onchange="fetchData()" style="width:100%; padding:10px; margin:15px 0; background:#000; color:#fff; border:1px solid var(--border);"></select>
                 
-                <div style="margin-top:20px; max-height:300px; overflow-y:auto">
-                    <table>
-                        <thead><tr><th>PRODUCTO</th><th>VENTA</th></tr></thead>
+                <input type="text" id="art" placeholder="Producto">
+                <input type="number" id="pc" placeholder="Coste Compra">
+                <input type="number" id="pv" placeholder="Venta Vinted">
+                <button class="btn" id="save-btn" onclick="save()">REGISTRAR</button>
+
+                <div style="margin-top:20px; max-height:350px; overflow-y:auto">
+                    <table style="width:100%; font-size:0.8rem">
                         <tbody id="history"></tbody>
                     </table>
                 </div>
             </div>
 
             <div class="card">
-                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px; margin-bottom:20px">
-                    <div class="stat-box">GANADO<span class="stat-val" id="t-ganado">0€</span></div>
-                    <div class="stat-box" style="border-color:var(--danger)">INVERTIDO<span class="stat-val" id="t-invertido" style="color:var(--danger)">0€</span></div>
-                    <div class="stat-box" style="border-color:var(--success)">BENEFICIO<span class="stat-val" id="t-beneficio" style="color:var(--success)">0€</span></div>
+                <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:15px; margin-bottom:15px">
+                    <div class="stat-box">GANADO<br><span id="t-ganado" style="font-size:1.4rem; font-weight:800">0€</span></div>
+                    <div class="stat-box">INVERTIDO<br><span id="t-invertido" style="font-size:1.4rem; font-weight:800; color:var(--danger)">0€</span></div>
+                    <div class="stat-box">
+                        BENEFICIO<br>
+                        <span id="t-beneficio" style="font-size:1.4rem; font-weight:800; color:var(--success)">0€</span><br>
+                        <span id="profit-status">IN PROFIT</span>
+                    </div>
                 </div>
-                <div style="height:350px; background:#000; border-radius:15px; padding:10px">
+                <div style="height:400px; background:#000; border-radius:15px; padding:15px">
                     <canvas id="chart"></canvas>
                 </div>
             </div>
 
             <div class="card">
-                <h3 style="margin-top:0; color:var(--danger)">GASTOS TOTALES</h3>
-                <p style="font-size:0.75rem; color:#888">Ajusta los gastos globales de esta cuenta para calcular el beneficio real.</p>
-                <label>Inversión Global (€)</label>
-                <input type="number" id="global-inv" placeholder="Total productos">
+                <h3 style="margin-top:0; color:var(--danger)">LOGÍSTICA GLOBAL</h3>
+                <label>Coste Inversión Total (€)</label>
+                <input type="number" id="global-inv" placeholder="Suma de stock">
                 <label style="display:block; margin-top:15px">Gastos Envío (€)</label>
-                <input type="number" id="global-env" placeholder="Total envíos">
-                <button class="btn" style="background:var(--danger); color:#fff" onclick="updateGlobalCosts()">APLICAR GASTOS</button>
+                <input type="number" id="global-env" placeholder="Suma de envíos">
+                <button class="btn" style="background:var(--danger); color:#fff" onclick="updateGlobalCosts()">ACTUALIZAR BALANCE</button>
+                
+                <div style="margin-top:30px; border-top:1px solid #333; padding-top:20px">
+                    <h4 style="margin:0">DAC7 RADAR</h4>
+                    <div style="height:10px; background:#000; border-radius:5px; margin:10px 0; overflow:hidden">
+                        <div id="dac-fill" style="height:100%; width:0%; background:var(--success); transition:1s"></div>
+                    </div>
+                    <small id="dac-text">0/30 vtas | 0/2000€</small>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         const AUTH = { user: "QPasaCnTuRollo", pass: "3F@guqu3" };
-        let sales = [];
-        let chart = null;
-
-        // RELOJ SINCRO
-        setInterval(() => {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString('es-ES');
-            document.getElementById('day').innerText = now.getDate();
-            document.getElementById('year').innerText = now.getFullYear();
-            const meses = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
-            document.getElementById('month').innerText = meses[now.getMonth()];
-        }, 1000);
+        let sales = [], chart = null, editingId = null, currentType = '';
 
         function login() {
             if(document.getElementById('user').value === AUTH.user && document.getElementById('pass').value === AUTH.pass) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('welcome-transition').style.display = 'flex';
-                setTimeout(() => { document.getElementById('l1').style.opacity = '1'; document.getElementById('l1').style.transform = 'scale(1)'; }, 500);
-                setTimeout(() => { document.getElementById('l2').style.opacity = '1'; document.getElementById('l2').style.transform = 'scale(1)'; }, 1000);
+                setTimeout(() => { document.getElementById('l1').style.opacity = '1'; }, 600);
+                setTimeout(() => { document.getElementById('l2').style.opacity = '1'; }, 1200);
                 setTimeout(() => {
                     document.getElementById('welcome-transition').style.display = 'none';
                     document.getElementById('main-content').style.display = 'block';
                     init();
-                }, 3500);
-            } else { alert("Acceso Denegado"); }
+                }, 4000);
+            }
         }
+
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('es-ES');
+            document.getElementById('day').innerText = now.getDate();
+            const meses = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+            document.getElementById('month').innerText = meses[now.getMonth()];
+        }, 1000);
 
         async function init() {
             const res = await fetch('/api/cuentas');
             const data = await res.json();
-            document.getElementById('sel-cuenta').innerHTML = data.map(c => `<option value="${c.id}">${c.nombre_gmail}</option>`).join('');
+            document.getElementById('sel-cuenta').innerHTML = data.map(c => `<option value="${c.id}" data-name="${c.nombre_gmail}" data-mail="${c.email}">${c.nombre_gmail}</option>`).join('');
             fetchData();
         }
 
@@ -163,87 +170,125 @@
 
         function updateGlobalCosts() {
             const idC = document.getElementById('sel-cuenta').value;
-            const inv = document.getElementById('global-inv').value;
-            const env = document.getElementById('global-env').value;
-            localStorage.setItem(`costs_${idC}`, JSON.stringify({inv, env}));
+            localStorage.setItem(`costs_${idC}`, JSON.stringify({
+                inv: document.getElementById('global-inv').value,
+                env: document.getElementById('global-env').value
+            }));
             render();
         }
 
         function render() {
             const idC = document.getElementById('sel-cuenta').value;
-            const filtered = sales.filter(s => s.id_cuenta == idC);
+            const filtered = sales.filter(s => s.id_cuenta == idC).reverse(); // Reversa para que el gráfico vaya de izq a der
             const saved = JSON.parse(localStorage.getItem(`costs_${idC}`)) || {inv: 0, env: 0};
             
             document.getElementById('global-inv').value = saved.inv;
             document.getElementById('global-env').value = saved.env;
 
             let totalGanado = 0;
-            let labels = [];
-            let dataBeneficio = [];
-            let acumulado = 0;
+            let labels = [], dataGanado = [], dataInvertido = [];
+            const invGlobal = (parseFloat(saved.inv) || 0) + (parseFloat(saved.env) || 0);
 
-            document.getElementById('history').innerHTML = filtered.map((s, i) => {
+            document.getElementById('history').innerHTML = [...filtered].reverse().map(s => {
                 totalGanado += s.precio_venta;
-                acumulado += s.precio_venta;
-                labels.unshift(i + 1);
-                dataBeneficio.unshift(acumulado);
-                return `<tr><td>${s.articulo}</td><td style="color:var(--success)">+${s.precio_venta}€</td></tr>`;
+                return `<tr>
+                    <td>${s.articulo}</td>
+                    <td style="color:var(--success)">${s.precio_venta}€</td>
+                    <td style="text-align:right"><button class="btn-edit" onclick="openEdit(${s.id}, '${s.articulo}', ${s.precio_compra}, ${s.precio_venta})">✎</button></td>
+                </tr>`;
             }).join('');
 
-            const totalInvertido = (parseFloat(saved.inv) || 0) + (parseFloat(saved.env) || 0);
-            const beneficioReal = totalGanado - totalInvertido;
+            // Lógica Gráfico (Evolución de izq a der)
+            let acumuladoGanado = 0;
+            filtered.forEach((s, i) => {
+                acumuladoGanado += s.precio_venta;
+                labels.push(`Venta ${i+1}`);
+                dataGanado.push(acumuladoGanado);
+                dataInvertido.push(invGlobal); // Línea roja constante para comparar
+            });
 
+            const beneficio = totalGanado - invGlobal;
             document.getElementById('t-ganado').innerText = totalGanado.toFixed(2) + "€";
-            document.getElementById('t-invertido').innerText = totalInvertido.toFixed(2) + "€";
-            document.getElementById('t-beneficio').innerText = beneficioReal.toFixed(2) + "€";
-
-            // DAC7 ALERTS
-            const vtas = filtered.length;
-            const pV = (vtas / 30) * 100;
-            const pD = (totalGanado / 2000) * 100;
-            const max = Math.max(pV, pD);
-            document.getElementById('dac-fill').style.width = Math.min(max, 100) + "%";
-            document.getElementById('dac-text').innerText = `${vtas}/30 vtas | ${totalGanado.toFixed(2)}/2000€`;
+            document.getElementById('t-invertido').innerText = invGlobal.toFixed(2) + "€";
+            document.getElementById('t-beneficio').innerText = beneficio.toFixed(2) + "€";
             
-            const status = document.getElementById('dac-status');
-            if(vtas >= 25 || totalGanado >= 1800) {
-                status.innerText = "¡ALERTA LÍMITE!";
-                status.className = "alert-active";
-                document.getElementById('dac-fill').style.background = "var(--danger)";
-            } else {
-                status.innerText = "SEGURO";
-                status.className = "";
-                document.getElementById('dac-fill').style.background = "var(--success)";
-            }
+            // Cartel de PROFIT
+            const profitBadge = document.getElementById('profit-status');
+            beneficio > 0 ? profitBadge.classList.add('is-profit') : profitBadge.classList.remove('is-profit');
 
-            // CHART
+            // DAC7
+            const vtas = filtered.length;
+            const p = Math.max((vtas/30)*100, (totalGanado/2000)*100);
+            document.getElementById('dac-fill').style.width = Math.min(p, 100) + "%";
+            document.getElementById('dac-text').innerText = `${vtas}/30 vtas | ${totalGanado.toFixed(2)}/2000€`;
+
+            // Gráfico Doble Línea
             const ctx = document.getElementById('chart').getContext('2d');
             if(chart) chart.destroy();
             chart = new Chart(ctx, {
                 type: 'line',
-                data: { labels, datasets: [{ label: 'Escalado', data: dataBeneficio, borderColor: '#00d4ff', tension: 0.3, fill: true, backgroundColor: 'rgba(0, 212, 255, 0.1)' }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#1c2128' } }, x: { display: false } } }
+                data: {
+                    labels,
+                    datasets: [
+                        { label: 'Ganancia Acumulada', data: dataGanado, borderColor: '#00ffa3', backgroundColor: 'rgba(0,255,163,0.1)', fill: true, tension: 0.3 },
+                        { label: 'Inversión Total', data: dataInvertido, borderColor: '#ff4d4d', borderDash: [5, 5], fill: false, tension: 0 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: { color: '#1c2128' } }, x: { grid: { display: false } } } }
             });
         }
 
+        // --- FUNCIONES DE EDICIÓN ---
+        function openEdit(id, art, pc, pv) {
+            editingId = id; currentType = 'product';
+            document.getElementById('modal-title').innerText = "Editar Producto";
+            document.getElementById('modal-fields').innerHTML = `
+                <input id="edit-1" value="${art}" placeholder="Nombre">
+                <input id="edit-2" type="number" value="${pc}" placeholder="Compra">
+                <input id="edit-3" type="number" value="${pv}" placeholder="Venta">
+            `;
+            document.getElementById('edit-modal').style.display = 'flex';
+        }
+
+        function editCuenta() {
+            const sel = document.getElementById('sel-cuenta');
+            const opt = sel.options[sel.selectedIndex];
+            editingId = sel.value; currentType = 'account';
+            document.getElementById('modal-title').innerText = "Editar Cuenta Gmail";
+            document.getElementById('modal-fields').innerHTML = `
+                <input id="edit-1" value="${opt.dataset.name}" placeholder="Nombre">
+                <input id="edit-2" value="${opt.dataset.mail}" placeholder="Correo Gmail">
+            `;
+            document.getElementById('edit-modal').style.display = 'flex';
+        }
+
+        async function updateItem() {
+            const val1 = document.getElementById('edit-1').value;
+            const val2 = document.getElementById('edit-2').value;
+            const val3 = document.getElementById('edit-3')?.value;
+
+            let body = currentType === 'product' 
+                ? { articulo: val1, precio_compra: val2, precio_venta: val3 }
+                : { nombre_gmail: val1, email: val2 };
+
+            const url = currentType === 'product' ? `/api/editar/${editingId}` : `/api/cuentas/${editingId}`;
+            await fetch(url, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
+            closeModal();
+            currentType === 'account' ? init() : fetchData();
+        }
+
+        function closeModal() { document.getElementById('edit-modal').style.display = 'none'; }
+
         async function save() {
-            const btn = document.getElementById('save-btn');
-            btn.innerText = "..."; btn.disabled = true;
             const payload = {
                 articulo: document.getElementById('art').value,
                 id_cuenta: document.getElementById('sel-cuenta').value,
                 precio_compra: document.getElementById('pc').value,
-                precio_venta: document.getElementById('pv').value
+                precio_venta: document.getElementById('pv').value,
+                fecha_venta: new Date().toISOString()
             };
-            const res = await fetch('/api/nuevo', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
-            if(res.ok) {
-                document.getElementById('art').value = ""; document.getElementById('pc').value = ""; document.getElementById('pv').value = "";
-                fetchData();
-            } else {
-                const err = await res.json();
-                alert("Error: " + err.detalle);
-            }
-            btn.innerText = "SUBIR A NUBE"; btn.disabled = false;
+            await fetch('/api/nuevo', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            document.getElementById('art').value = ""; fetchData();
         }
     </script>
 </body>
