@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>V-Masters</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%2300e5ff'/%3E%3Cstop offset='100%25' style='stop-color:%2300ffa3'/%3E%3C/linearGradient%3E%3Cfilter id='f'%3E%3CfeGaussianBlur stdDeviation='3' result='b'/%3E%3CfeMerge%3E%3CfeMergeNode in='b'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%3Ccircle cx='64' cy='64' r='60' fill='%23030406' stroke='%231c2128' stroke-width='2'/%3E%3Cpath d='M30 35 L64 95 L98 35 L82 35 L64 68 L46 35 Z' fill='url(%23g)' filter='url(%23f)'/%3E%3Cpath d='M64 95 L98 35 L90 35 L64 82 Z' fill='rgba(255,255,255,0.1)'/%3E%3C/svg%3E">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
@@ -1520,6 +1521,12 @@ async function saveProduct() {
 function render() {
   const idC    = document.getElementById('sel-cuenta').value;
   const filter = sales.filter(s => String(s.id_cuenta) === String(idC));
+
+  // Cargar costes guardados para esta cuenta
+  const saved = JSON.parse(localStorage.getItem(`vm_costs_${idC}`)) || {};
+  if (saved.envio     !== undefined) document.getElementById('inp-envio').value     = saved.envio;
+  if (saved.invertido !== undefined) document.getElementById('inp-invertido').value = saved.invertido;
+
   const envio      = parseFloat(document.getElementById('inp-envio').value) || 0;
   const invertido  = parseFloat(document.getElementById('inp-invertido').value) || 0;
 
@@ -1773,6 +1780,7 @@ function askReset() {
   const id = document.getElementById('sel-cuenta').value;
   openConfirm('RESETEAR CUENTA', 'Se eliminarán TODOS los registros de la cuenta seleccionada. ¿Seguro?', async () => {
     await fetch(`/api/reset-cuenta/${id}`, { method:'DELETE' });
+    localStorage.removeItem(`vm_costs_${id}`);
     document.getElementById('inp-envio').value = '';
     document.getElementById('inp-invertido').value = '';
     showToast('Cuenta reseteada');
@@ -1824,6 +1832,12 @@ function doLogout() {
    COSTS
 ═══════════════════════════════════════ */
 function updateCosts() {
+  const id = document.getElementById('sel-cuenta').value;
+  if (id) {
+    const envio     = document.getElementById('inp-envio').value;
+    const invertido = document.getElementById('inp-invertido').value;
+    localStorage.setItem(`vm_costs_${id}`, JSON.stringify({ envio, invertido }));
+  }
   render();
 }
 
