@@ -21,17 +21,6 @@ app.post('/api/nuevo', async (req, res) => {
     res.json({ status: error ? "error" : "ok" });
 });
 
-app.put('/api/editar/:id', async (req, res) => {
-    const { error } = await supabase.from('inventario').update(req.body).eq('id', req.params.id);
-    res.json({ status: error ? "error" : "ok" });
-});
-
-app.delete('/api/eliminar/:id', async (req, res) => {
-    await supabase.from('inventario').delete().eq('id', req.params.id);
-    res.json({ status: "ok" });
-});
-
-// BORRADO MAESTRO (Reset total de la cuenta actual)
 app.delete('/api/reset-cuenta/:id', async (req, res) => {
     const { error } = await supabase.from('inventario').delete().eq('id_cuenta', req.params.id);
     res.json({ status: error ? "error" : "ok" });
@@ -43,14 +32,7 @@ app.get('/api/cuentas', async (req, res) => {
     res.json(data || []);
 });
 
-app.put('/api/cuentas/:id', async (req, res) => {
-    await supabase.from('cuentas').update(req.body).eq('id', req.params.id);
-    res.json({ status: "ok" });
-});
-
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => console.log(`🚀 V-MASTER ONLINE`));
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => console.log(`🚀 V-MASTER ONLINE`));
