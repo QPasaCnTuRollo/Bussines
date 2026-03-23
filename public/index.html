@@ -775,6 +775,13 @@ body::before {
 
 .product-item:hover { border-color: var(--border); }
 
+.product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
 .product-name {
   font-size: 13px;
   font-weight: 600;
@@ -782,6 +789,13 @@ body::before {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.product-fecha {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: rgba(240,255,244,0.38);
+  letter-spacing: 1px;
 }
 
 .product-price {
@@ -1399,14 +1413,16 @@ function launchApp() {
   setTimeout(() => {
     app.classList.add('visible');
     init();
-    startClock();
+    if (!window._clockStarted) { startClock(); window._clockStarted = true; }
   }, 50);
 }
 
 /* ═══════════════════════════════════════
    CLOCK & DATE
 ═══════════════════════════════════════ */
+let _clockInterval = null;
 function startClock() {
+  if (_clockInterval) return;
   const MESES = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO',
                  'JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
   const DIAS  = ['DOMINGO','LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES','SÁBADO'];
@@ -1427,7 +1443,7 @@ function startClock() {
       n.getFullYear();
   }
   tick();
-  setInterval(tick, 1000);
+  _clockInterval = setInterval(tick, 1000);
 }
 
 /* ═══════════════════════════════════════
@@ -1515,16 +1531,22 @@ function render() {
       <div class="empty-state-text">SIN REGISTROS</div>
     </div>`;
   } else {
-    list.innerHTML = [...filter].reverse().map(s => `
+    list.innerHTML = [...filter].reverse().map(s => {
+      const fecha = s.fecha_venta ? new Date(s.fecha_venta) : null;
+      const fechaStr = fecha ? `${String(fecha.getDate()).padStart(2,'0')}/${String(fecha.getMonth()+1).padStart(2,'0')} ${String(fecha.getHours()).padStart(2,'0')}:${String(fecha.getMinutes()).padStart(2,'0')}` : '';
+      return `
       <div class="product-item">
-        <span class="product-name" title="${s.articulo}">${s.articulo}</span>
+        <div class="product-info">
+          <span class="product-name" title="${s.articulo}">${s.articulo}</span>
+          ${fechaStr ? `<span class="product-fecha">${fechaStr}</span>` : ''}
+        </div>
         <span class="product-price">${parseFloat(s.precio_venta).toFixed(2)}€</span>
         <div class="product-actions">
           <button class="btn-tiny edit" onclick="openEditItem(${s.id},'${escQ(s.articulo)}',${s.precio_compra},${s.precio_venta})" title="Editar">✎</button>
           <button class="btn-tiny del"  onclick="confirmDeleteItem(${s.id})" title="Eliminar">✕</button>
         </div>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
   }
 
   // — Stats —
@@ -1761,18 +1783,18 @@ function askReset() {
 function doLogout() {
   document.getElementById('app').style.opacity = '0';
   setTimeout(() => {
-    document.getElementById('app').style.display = 'none';
-    document.getElementById('app').classList.remove('visible');
-    const ls = document.getElementById('login-screen');
-    ls.style.display = 'flex';
-    ls.classList.remove('out');
-    ls.style.opacity = '1';
-    ls.style.transform = 'none';
-    ls.style.animation = 'none';
-    document.getElementById('inp-user').value = '';
-    document.getElementById('inp-pass').value = '';
-    document.getElementById('login-error').classList.remove('show');
-    // Reset welcome screen
+    // Reset app
+    const app = document.getElementById('app');
+    app.style.display = 'none';
+    app.style.opacity = '';
+    app.classList.remove('visible');
+
+    // Reset welcome screen completamente
+    const ws = document.getElementById('welcome-screen');
+    ws.classList.remove('fade-out');
+    ws.style.opacity = '1';
+    ws.style.display = 'none';
+    ws.style.transition = '';
     document.getElementById('wl1').className = 'welcome-logo';
     document.getElementById('wl2').className = 'welcome-logo';
     document.getElementById('wc1').classList.remove('visible');
@@ -1780,8 +1802,21 @@ function doLogout() {
     document.getElementById('wdiv').classList.remove('visible');
     document.getElementById('wtxt').classList.remove('visible');
     document.getElementById('wbar').classList.remove('visible');
+    document.getElementById('wbar-fill').style.transition = 'none';
     document.getElementById('wbar-fill').style.width = '0%';
-    document.getElementById('welcome-screen').classList.remove('fade-out');
+    setTimeout(() => {
+      document.getElementById('wbar-fill').style.transition = '';
+    }, 50);
+
+    // Mostrar login
+    const ls = document.getElementById('login-screen');
+    ls.style.display = 'flex';
+    ls.classList.remove('out');
+    ls.style.opacity = '1';
+    ls.style.transform = 'none';
+    document.getElementById('inp-user').value = '';
+    document.getElementById('inp-pass').value = '';
+    document.getElementById('login-error').classList.remove('show');
   }, 500);
 }
 
@@ -1801,19 +1836,6 @@ function showToast(msg) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2400);
 }
-
-/* ═══════════════════════════════════════
-   UTILS
-═══════════════════════════════════════ */
-function escQ(s) { return String(s).replace(/'/g, "\\'"); }
-
-/* ── Enter en login ── */
-document.getElementById('inp-user').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('inp-pass').focus();
-});
-</script>
-</body>
-</html>
 
 /* ═══════════════════════════════════════
    UTILS
