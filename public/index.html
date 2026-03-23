@@ -24,9 +24,9 @@
   --amber:      #ffab00;
   --border:     rgba(0,255,136,0.12);
   --border2:    rgba(255,255,255,0.06);
-  --text:       #ddeedd;
-  --text-dim:   rgba(221,238,221,0.45);
-  --text-muted: rgba(221,238,221,0.22);
+  --text:       #f0fff4;
+  --text-dim:   rgba(240,255,244,0.72);
+  --text-muted: rgba(240,255,244,0.48);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -221,6 +221,30 @@ body::before {
   align-items: center;
   gap: 40px;
   margin-bottom: 50px;
+}
+
+.welcome-logo-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.welcome-credit {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 3px;
+  color: var(--text-muted);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.8s ease, transform 0.8s ease, color 0.6s ease;
+}
+
+.welcome-credit.visible {
+  opacity: 1;
+  transform: translateY(0);
+  color: var(--green);
+  text-shadow: 0 0 12px var(--green-glow);
 }
 
 .welcome-logo {
@@ -489,34 +513,34 @@ body::before {
 /* ── DAC7 ALERT ── */
 .dac7-bar {
   flex-shrink: 0;
-  padding: 7px 28px;
+  padding: 8px 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  gap: 16px;
 }
 
 .dac7-badge {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   border-radius: 10px;
-  padding: 8px 20px;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 2px;
+  padding: 10px 26px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 3px;
   border: 1px solid;
   transition: all 0.3s;
 }
 
 .dac7-badge.safe {
   background: rgba(0,255,136,0.04);
-  border-color: rgba(0,255,136,0.15);
-  color: var(--text-muted);
+  border-color: rgba(0,255,136,0.2);
+  color: rgba(240,255,244,0.55);
 }
 
 .dac7-dot {
-  width: 8px; height: 8px;
+  width: 10px; height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -532,35 +556,37 @@ body::before {
 }
 
 .dac7-badge.warn {
-  background: rgba(255,171,0,0.06);
-  border-color: rgba(255,171,0,0.5);
+  background: rgba(255,171,0,0.10);
+  border-color: rgba(255,171,0,0.7);
   color: var(--amber);
+  box-shadow: 0 0 20px rgba(255,171,0,0.15), inset 0 0 20px rgba(255,171,0,0.04);
   animation: blinkSlow 2s infinite;
 }
 
 .dac7-badge.warn .dac7-dot {
   background: var(--amber);
-  box-shadow: 0 0 6px var(--amber);
+  box-shadow: 0 0 8px var(--amber), 0 0 16px var(--amber);
   animation: blinkSlow 2s infinite;
 }
 
 .dac7-badge.danger {
-  background: rgba(255,34,68,0.08);
+  background: rgba(255,34,68,0.12);
   border-color: var(--red);
   color: var(--red);
+  box-shadow: 0 0 30px rgba(255,34,68,0.25), inset 0 0 20px rgba(255,34,68,0.06);
   animation: blinkFast 0.6s infinite;
 }
 
 .dac7-badge.danger .dac7-dot {
   background: var(--red);
-  box-shadow: 0 0 8px var(--red);
+  box-shadow: 0 0 10px var(--red), 0 0 20px var(--red);
   animation: blinkFast 0.6s infinite;
 }
 
 .dac7-stats {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
-  color: var(--text-muted);
+  font-size: 13px;
+  color: rgba(240,255,244,0.6);
   letter-spacing: 1px;
 }
 
@@ -607,9 +633,9 @@ body::before {
 
 .card-title {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 3px;
-  color: var(--text-muted);
+  color: rgba(240,255,244,0.65);
   text-transform: uppercase;
   flex-shrink: 0;
 }
@@ -807,9 +833,9 @@ body::before {
 
 .stat-label {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 8px;
+  font-size: 9px;
   letter-spacing: 2px;
-  color: var(--text-muted);
+  color: rgba(240,255,244,0.65);
   margin-bottom: 4px;
 }
 
@@ -857,9 +883,9 @@ body::before {
 
 .logistics-stat-label {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 2px;
-  color: var(--text-muted);
+  color: rgba(240,255,244,0.65);
   margin-bottom: 6px;
 }
 
@@ -1117,9 +1143,15 @@ body::before {
 ════════════════════════════════════════════════════ -->
 <div id="welcome-screen">
   <div class="welcome-logos">
-    <img src="logo1.png" id="wl1" class="welcome-logo" alt="Logo 1">
+    <div class="welcome-logo-wrap" id="ww1">
+      <img src="logo1.png" id="wl1" class="welcome-logo" alt="Logo 1">
+      <div class="welcome-credit" id="wc1">by AkkaKarma</div>
+    </div>
     <div class="welcome-divider" id="wdiv"></div>
-    <img src="logo2.png" id="wl2" class="welcome-logo" alt="Logo 2">
+    <div class="welcome-logo-wrap" id="ww2">
+      <img src="logo2.png" id="wl2" class="welcome-logo" alt="Logo 2">
+      <div class="welcome-credit" id="wc2">by QPasaCnTuRollo</div>
+    </div>
   </div>
   <div class="welcome-text" id="wtxt">BIENVENIDO AL <span>SISTEMA</span></div>
   <div class="welcome-bar" id="wbar"><div class="welcome-bar-fill" id="wbar-fill"></div></div>
@@ -1330,10 +1362,12 @@ function startWelcome() {
     document.getElementById('wl2').classList.add('visible');
   }, 1000);
 
-  // logos se iluminan
+  // logos se iluminan + créditos aparecen
   setTimeout(() => {
     document.getElementById('wl1').classList.add('glow');
     document.getElementById('wl2').classList.add('glow');
+    document.getElementById('wc1').classList.add('visible');
+    document.getElementById('wc2').classList.add('visible');
   }, 1900);
 
   // texto bienvenida
@@ -1741,6 +1775,8 @@ function doLogout() {
     // Reset welcome screen
     document.getElementById('wl1').className = 'welcome-logo';
     document.getElementById('wl2').className = 'welcome-logo';
+    document.getElementById('wc1').classList.remove('visible');
+    document.getElementById('wc2').classList.remove('visible');
     document.getElementById('wdiv').classList.remove('visible');
     document.getElementById('wtxt').classList.remove('visible');
     document.getElementById('wbar').classList.remove('visible');
@@ -1765,6 +1801,19 @@ function showToast(msg) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2400);
 }
+
+/* ═══════════════════════════════════════
+   UTILS
+═══════════════════════════════════════ */
+function escQ(s) { return String(s).replace(/'/g, "\\'"); }
+
+/* ── Enter en login ── */
+document.getElementById('inp-user').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('inp-pass').focus();
+});
+</script>
+</body>
+</html>
 
 /* ═══════════════════════════════════════
    UTILS
