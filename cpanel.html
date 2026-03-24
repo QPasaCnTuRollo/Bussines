@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V-Masters · CPanel</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%2300e5ff'/%3E%3Cstop offset='100%25' style='stop-color:%2300ffa3'/%3E%3C/linearGradient%3E%3Cfilter id='f'%3E%3CfeGaussianBlur stdDeviation='3' result='b'/%3E%3CfeMerge%3E%3CfeMergeNode in='b'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%3Ccircle cx='64' cy='64' r='60' fill='%23030406' stroke='%231c2128' stroke-width='2'/%3E%3Cpath d='M30 35 L64 95 L98 35 L82 35 L64 68 L46 35 Z' fill='url(%23g)' filter='url(%23f)'/%3E%3Cpath d='M64 95 L98 35 L90 35 L64 82 Z' fill='rgba(255,255,255,0.1)'/%3E%3C/svg%3E">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#04080f; --surface:#080f1a; --surface2:#0c1525; --surface3:#111d2e;
+  --green:#00ff88; --green-glow:rgba(0,255,136,0.4);
+  --red:#ff2244; --amber:#ffab00; --cyan:#00e5ff; --purple:#b44fff;
+  --border:rgba(0,255,136,0.12); --border2:rgba(255,255,255,0.06);
+  --text:#f0fff4; --text-dim:rgba(240,255,244,0.72); --text-muted:rgba(240,255,244,0.48);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,255,136,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,0.02) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 4px);pointer-events:none;z-index:0;}
+::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+/* LOGIN */
+#cp-login{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;background:var(--bg);}
+#cp-login.hidden{opacity:0;pointer-events:none;transition:opacity 0.6s ease;}
+.cp-login-title{font-family:'Bebas Neue',sans-serif;font-size:60px;letter-spacing:14px;background:linear-gradient(180deg,#fff 0%,var(--cyan) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 30px rgba(0,229,255,0.5));margin-bottom:4px;}
+.cp-login-sub{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:5px;color:var(--text-muted);margin-bottom:44px;}
+.cp-login-box{background:var(--surface);border:1px solid rgba(0,229,255,0.2);border-radius:20px;padding:40px 44px;width:380px;box-shadow:0 0 60px rgba(0,229,255,0.07),0 30px 80px rgba(0,0,0,0.6);position:relative;overflow:hidden;}
+.cp-login-box::before{content:'';position:absolute;top:-1px;left:20%;right:20%;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);animation:sweep 3s linear infinite;}
+@keyframes sweep{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.cp-label{font-size:10px;letter-spacing:3px;color:var(--text-muted);margin-bottom:8px;display:block;}
+.cp-input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:13px 15px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:600;outline:none;transition:border-color 0.3s,box-shadow 0.3s;margin-bottom:14px;}
+.cp-input:focus{border-color:rgba(0,229,255,0.4);box-shadow:0 0 0 3px rgba(0,229,255,0.07);}
+.cp-input::placeholder{color:var(--text-muted);font-weight:400;}
+.cp-login-err{font-size:11px;letter-spacing:1px;color:var(--red);text-align:center;height:16px;opacity:0;transition:opacity 0.3s;margin-bottom:12px;}
+.cp-login-err.show{opacity:1;}
+.cp-btn-login{width:100%;background:linear-gradient(135deg,var(--cyan),#0099cc);border:none;border-radius:10px;padding:14px;color:#04080f;font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:4px;cursor:pointer;transition:transform 0.2s,box-shadow 0.3s;box-shadow:0 4px 28px rgba(0,229,255,0.3);}
+.cp-btn-login:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(0,229,255,0.45);}
+
+/* HEADER */
+.cp-header{position:relative;z-index:10;background:linear-gradient(180deg,rgba(0,229,255,0.05) 0%,transparent 100%);border-bottom:1px solid rgba(0,229,255,0.1);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;}
+.cp-header::after{content:'';position:absolute;bottom:-1px;left:5%;right:5%;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);}
+.cp-header-brand{display:flex;align-items:center;gap:16px;}
+.cp-brand-title{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:10px;background:linear-gradient(135deg,#fff 0%,var(--cyan) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 20px rgba(0,229,255,0.5));}
+.cp-brand-badge{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--cyan);background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.2);border-radius:6px;padding:3px 10px;}
+.cp-header-right{display:flex;align-items:center;gap:12px;}
+.cp-user-badge{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--text-muted);background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:6px 14px;}
+.cp-user-badge span{color:var(--cyan);}
+.cp-btn{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;padding:8px 18px;border-radius:8px;cursor:pointer;border:1px solid;transition:all 0.2s;}
+.cp-btn.back{border-color:rgba(0,255,136,0.3);color:var(--green);background:rgba(0,255,136,0.06);}
+.cp-btn.back:hover{background:rgba(0,255,136,0.12);box-shadow:0 0 14px rgba(0,255,136,0.2);}
+.cp-btn.logout{border-color:var(--border2);color:var(--text-muted);background:transparent;}
+.cp-btn.logout:hover{border-color:var(--border);color:var(--text);}
+
+/* TABS */
+.cp-tabs{position:relative;z-index:10;display:flex;gap:0;padding:0 32px;border-bottom:1px solid var(--border2);}
+.cp-tab{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:3px;color:var(--text-muted);padding:14px 24px;cursor:pointer;border-bottom:2px solid transparent;transition:color 0.3s,border-color 0.3s;position:relative;}
+.cp-tab:hover{color:var(--text-dim);}
+.cp-tab.active{color:var(--cyan);border-bottom-color:var(--cyan);text-shadow:0 0 14px rgba(0,229,255,0.4);}
+.cp-tab-count{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:0;background:rgba(0,229,255,0.12);color:var(--cyan);border-radius:10px;padding:1px 7px;margin-left:8px;vertical-align:middle;}
+
+/* MAIN */
+.cp-main{position:relative;z-index:10;padding:28px 32px;min-height:calc(100vh - 130px);}
+.cp-section{display:none;}
+.cp-section.active{display:block;}
+
+/* SECTION HEADER */
+.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.sec-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:6px;color:var(--text);}
+.sec-title span{color:var(--cyan);}
+.sec-subtitle{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--text-muted);margin-top:2px;}
+
+/* ACCOUNTS GRID */
+.accounts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:28px;}
+.account-card{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:20px 22px;transition:border-color 0.3s,box-shadow 0.3s,transform 0.3s;position:relative;overflow:hidden;animation:cardIn 0.5s cubic-bezier(0.16,1,0.3,1) both;}
+@keyframes cardIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.account-card::before{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,rgba(0,229,255,0.2),transparent);}
+.account-card:hover{border-color:rgba(0,229,255,0.18);box-shadow:0 8px 32px rgba(0,0,0,0.3);transform:translateY(-2px);}
+.account-card.bloqueada{border-color:rgba(255,34,68,0.2);}
+.account-card.bloqueada::before{background:linear-gradient(90deg,transparent,rgba(255,34,68,0.3),transparent);}
+.account-card.bloqueada:hover{border-color:rgba(255,34,68,0.4);}
+.account-card.cerrada{border-color:rgba(255,171,0,0.2);}
+.account-card.cerrada::before{background:linear-gradient(90deg,transparent,rgba(255,171,0,0.3),transparent);}
+.account-card.cerrada:hover{border-color:rgba(255,171,0,0.35);}
+.ac-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;}
+.ac-name{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--text);line-height:1;}
+.ac-email{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-muted);letter-spacing:1px;margin-top:3px;}
+.ac-status{display:flex;align-items:center;gap:6px;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2px;padding:4px 12px;border-radius:20px;border:1px solid;white-space:nowrap;}
+.ac-status.abierta{color:var(--green);border-color:rgba(0,255,136,0.3);background:rgba(0,255,136,0.06);}
+.ac-status.cerrada{color:var(--amber);border-color:rgba(255,171,0,0.3);background:rgba(255,171,0,0.06);}
+.ac-status.bloqueada{color:var(--red);border-color:rgba(255,34,68,0.3);background:rgba(255,34,68,0.06);animation:blinkSlow 2s infinite;}
+@keyframes blinkSlow{0%,100%{opacity:1}50%{opacity:0.5}}
+.ac-status-dot{width:7px;height:7px;border-radius:50%;}
+.ac-status.abierta .ac-status-dot{background:var(--green);box-shadow:0 0 6px var(--green);}
+.ac-status.cerrada .ac-status-dot{background:var(--amber);}
+.ac-status.bloqueada .ac-status-dot{background:var(--red);box-shadow:0 0 6px var(--red);animation:blinkSlow 1s infinite;}
+.ac-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.ac-field{background:var(--surface2);border-radius:8px;padding:8px 10px;}
+.ac-field-label{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--text-muted);margin-bottom:3px;}
+.ac-field-val{font-size:13px;font-weight:600;color:var(--text);}
+.ac-field-val.model{color:var(--cyan);}
+.ac-actions{display:flex;gap:8px;}
+.ac-btn{flex:1;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2px;padding:8px;border-radius:8px;cursor:pointer;border:1px solid;transition:all 0.2s;text-align:center;}
+.ac-btn.edit{border-color:rgba(0,229,255,0.25);color:var(--cyan);background:rgba(0,229,255,0.05);}
+.ac-btn.edit:hover{background:rgba(0,229,255,0.12);box-shadow:0 0 10px rgba(0,229,255,0.15);}
+.ac-btn.close{border-color:rgba(255,171,0,0.25);color:var(--amber);background:rgba(255,171,0,0.05);}
+.ac-btn.close:hover{background:rgba(255,171,0,0.12);}
+.ac-btn.block{border-color:rgba(255,34,68,0.25);color:var(--red);background:rgba(255,34,68,0.05);}
+.ac-btn.block:hover{background:rgba(255,34,68,0.12);}
+.ac-btn.open{border-color:rgba(0,255,136,0.25);color:var(--green);background:rgba(0,255,136,0.05);}
+.ac-btn.open:hover{background:rgba(0,255,136,0.12);}
+.ac-btn.del{border-color:rgba(255,34,68,0.15);color:rgba(255,34,68,0.5);background:transparent;}
+.ac-btn.del:hover{border-color:rgba(255,34,68,0.4);color:var(--red);}
+
+/* ADD ACCOUNT FORM */
+.add-account-panel{background:var(--surface);border:1px solid rgba(0,229,255,0.12);border-radius:16px;padding:24px 26px;margin-bottom:28px;position:relative;overflow:hidden;}
+.add-account-panel::before{content:'';position:absolute;top:-1px;left:15%;right:15%;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);}
+.add-form-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:4px;color:var(--cyan);margin-bottom:18px;display:flex;align-items:center;gap:10px;}
+.add-form-title::before{content:'+';width:24px;height:24px;background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.25);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.add-form-grid{display:grid;grid-template-columns:1fr 1fr 1fr 160px;gap:12px;align-items:end;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--text-muted);}
+.form-input{background:var(--surface2);border:1px solid var(--border2);border-radius:9px;padding:10px 13px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;outline:none;transition:border-color 0.3s,box-shadow 0.3s;width:100%;}
+.form-input:focus{border-color:rgba(0,229,255,0.4);box-shadow:0 0 0 3px rgba(0,229,255,0.06);}
+.form-input::placeholder{color:var(--text-muted);font-weight:400;}
+.form-select{background:var(--surface2);border:1px solid var(--border2);border-radius:9px;padding:10px 13px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;outline:none;cursor:pointer;width:100%;}
+.form-select:focus{border-color:rgba(0,229,255,0.4);}
+.btn-add{background:linear-gradient(135deg,var(--cyan),#0099cc);border:none;border-radius:9px;padding:11px 20px;color:#04080f;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:3px;cursor:pointer;transition:transform 0.2s,box-shadow 0.3s;box-shadow:0 4px 20px rgba(0,229,255,0.2);white-space:nowrap;}
+.btn-add:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,229,255,0.35);}
+
+/* MONTHLY STATS */
+.monthly-header-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+.mstat-card{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:18px 20px;position:relative;overflow:hidden;transition:border-color 0.3s,transform 0.3s;}
+.mstat-card:hover{border-color:rgba(0,229,255,0.15);transform:translateY(-2px);}
+.mstat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--line);transform:scaleX(0);transition:transform 0.4s;}
+.mstat-card:hover::after{transform:scaleX(1);}
+.mstat-label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:6px;}
+.mstat-val{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;line-height:1;}
+.monthly-chart-wrap{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:24px;margin-bottom:24px;position:relative;overflow:hidden;}
+.monthly-chart-wrap::before{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,rgba(0,229,255,0.2),transparent);}
+.monthly-chart-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:4px;color:var(--text-dim);margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;}
+.chart-legend{display:flex;gap:20px;}
+.legend-item{display:flex;align-items:center;gap:6px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-muted);}
+.legend-dot{width:8px;height:8px;border-radius:50%;}
+.monthly-chart-canvas{height:280px;position:relative;}
+
+/* MONTHS TABLE */
+.months-table-wrap{background:var(--surface);border:1px solid var(--border2);border-radius:16px;overflow:hidden;margin-bottom:24px;}
+.months-table{width:100%;border-collapse:collapse;}
+.months-table th{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--text-muted);padding:14px 18px;text-align:left;border-bottom:1px solid var(--border2);background:var(--surface2);}
+.months-table td{padding:13px 18px;border-bottom:1px solid rgba(255,255,255,0.03);font-size:14px;font-weight:600;vertical-align:middle;}
+.months-table tr:last-child td{border-bottom:none;}
+.months-table tr:hover td{background:rgba(0,229,255,0.02);}
+.month-badge{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--cyan);}
+.month-val-pos{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--green);}
+.month-val-neg{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--red);}
+.month-val-neu{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--text-dim);}
+.month-bar-wrap{width:120px;background:var(--surface2);border-radius:4px;height:6px;overflow:hidden;}
+.month-bar-fill{height:100%;border-radius:4px;transition:width 0.8s cubic-bezier(0.16,1,0.3,1);}
+.td-actions{display:flex;gap:6px;}
+.tbl-btn{width:26px;height:26px;border-radius:6px;border:1px solid;background:transparent;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.tbl-btn.edit{border-color:rgba(0,229,255,0.25);color:var(--cyan);}
+.tbl-btn.edit:hover{background:rgba(0,229,255,0.1);}
+.tbl-btn.del{border-color:rgba(255,34,68,0.2);color:rgba(255,34,68,0.5);}
+.tbl-btn.del:hover{border-color:rgba(255,34,68,0.4);color:var(--red);}
+
+/* ADD MONTH FORM */
+.add-month-panel{background:var(--surface);border:1px solid rgba(0,255,136,0.1);border-radius:16px;padding:22px 24px;position:relative;overflow:hidden;}
+.add-month-panel::before{content:'';position:absolute;top:-1px;left:15%;right:15%;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent);}
+.add-month-grid{display:grid;grid-template-columns:140px 140px 1fr 1fr 1fr 1fr auto;gap:12px;align-items:end;}
+
+/* HISTORY */
+.history-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;}
+.hist-card{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:18px 20px;}
+.hist-label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:6px;}
+.hist-val{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:2px;}
+.history-list{display:flex;flex-direction:column;gap:12px;}
+.hist-item{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:18px 22px;display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:16px;transition:border-color 0.3s;animation:cardIn 0.4s ease both;}
+.hist-item:hover{border-color:rgba(255,255,255,0.1);}
+.hist-item.bloqueada{border-left:3px solid var(--red);}
+.hist-item.cerrada{border-left:3px solid var(--amber);}
+.hist-item-info{display:flex;flex-direction:column;gap:4px;}
+.hist-name{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;color:var(--text);}
+.hist-meta{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.hist-tag{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;padding:2px 8px;border-radius:4px;border:1px solid;}
+.hist-tag.bloqueada{color:var(--red);border-color:rgba(255,34,68,0.3);background:rgba(255,34,68,0.05);}
+.hist-tag.cerrada{color:var(--amber);border-color:rgba(255,171,0,0.3);background:rgba(255,171,0,0.05);}
+.hist-date{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-muted);}
+.hist-email{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-muted);}
+.hist-beneficio{text-align:right;}
+.hist-ben-label{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--text-muted);margin-bottom:4px;}
+.hist-ben-val{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;}
+.hist-ben-val.pos{color:var(--green);text-shadow:0 0 15px rgba(0,255,136,0.3);}
+.hist-ben-val.neg{color:var(--red);}
+.hist-ben-val.neu{color:var(--text-dim);}
+.hist-delete{width:30px;height:30px;border-radius:7px;border:1px solid rgba(255,34,68,0.2);background:transparent;color:rgba(255,34,68,0.4);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all 0.2s;}
+.hist-delete:hover{border-color:rgba(255,34,68,0.5);color:var(--red);background:rgba(255,34,68,0.06);}
+.empty-hist{text-align:center;padding:60px 20px;color:var(--text-muted);}
+.empty-hist-icon{font-size:40px;opacity:0.2;margin-bottom:12px;}
+.empty-hist-text{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;}
+
+/* MODAL */
+.cp-modal{position:fixed;inset:0;background:rgba(4,8,15,0.93);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;z-index:5000;opacity:0;transition:opacity 0.3s;}
+.cp-modal.open{display:flex;opacity:1;}
+.cp-modal-box{background:var(--surface);border:1px solid rgba(0,229,255,0.2);border-radius:20px;padding:36px;width:420px;animation:modalIn 0.4s cubic-bezier(0.16,1,0.3,1) both;position:relative;overflow:hidden;box-shadow:0 0 80px rgba(0,229,255,0.08),0 40px 100px rgba(0,0,0,0.7);}
+.cp-modal-box::before{content:'';position:absolute;top:-1px;left:20%;right:20%;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);}
+@keyframes modalIn{from{opacity:0;transform:scale(0.93) translateY(16px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.cp-modal-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;color:var(--text);margin-bottom:24px;}
+.cp-modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px;}
+.cp-modal-grid.single{grid-template-columns:1fr;}
+.cp-modal-actions{display:flex;gap:10px;margin-top:20px;}
+.cp-modal-actions button{flex:1;}
+
+/* CONFIRM */
+.cp-confirm{position:fixed;inset:0;background:rgba(4,8,15,0.95);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;z-index:6000;opacity:0;transition:opacity 0.3s;}
+.cp-confirm.open{display:flex;opacity:1;}
+.cp-confirm-box{background:var(--surface);border:1px solid rgba(255,34,68,0.25);border-radius:18px;padding:36px;width:360px;text-align:center;animation:modalIn 0.35s ease both;box-shadow:0 0 60px rgba(255,34,68,0.1);}
+.cp-confirm-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--red),transparent);}
+.cp-confirm-box{position:relative;overflow:hidden;}
+.cp-confirm-box h3{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:4px;color:var(--red);margin-bottom:8px;}
+.cp-confirm-box p{font-size:13px;color:var(--text-dim);line-height:1.6;margin-bottom:26px;}
+.cp-confirm-btns{display:flex;gap:10px;}
+.cp-confirm-btns button{flex:1;}
+
+/* TOAST */
+.cp-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(24px);background:var(--surface);border:1px solid rgba(0,229,255,0.2);border-radius:12px;padding:12px 24px;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--cyan);opacity:0;transition:opacity 0.35s,transform 0.35s;z-index:9999;pointer-events:none;box-shadow:0 0 30px rgba(0,229,255,0.1);}
+.cp-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.cp-toast.ok{border-color:rgba(0,255,136,0.25);color:var(--green);}
+.cp-toast.err{border-color:rgba(255,34,68,0.25);color:var(--red);}
+
+/* STATUS CLOSE FORM */
+.close-beneficio-form{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;margin-top:12px;}
+.close-ben-label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px;}
+
+/* UTILS */
+.btn-danger{background:rgba(255,34,68,0.08);border:1px solid rgba(255,34,68,0.3);border-radius:9px;padding:11px;color:var(--red);font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:3px;cursor:pointer;transition:all 0.2s;}
+.btn-danger:hover{background:rgba(255,34,68,0.15);transform:translateY(-1px);}
+.btn-save{background:linear-gradient(135deg,var(--cyan),#0099cc);border:none;border-radius:9px;padding:11px;color:#04080f;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:3px;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 18px rgba(0,229,255,0.2);}
+.btn-save:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(0,229,255,0.35);}
+.btn-cancel{background:transparent;border:1px solid var(--border2);border-radius:9px;padding:10px;color:var(--text-muted);font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;letter-spacing:2px;cursor:pointer;transition:all 0.2s;}
+.btn-cancel:hover{border-color:var(--border);color:var(--text-dim);}
+.btn-green{background:linear-gradient(135deg,var(--green),#00cc66);border:none;border-radius:9px;padding:11px;color:#04080f;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:3px;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 18px rgba(0,255,136,0.2);}
+.btn-green:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(0,255,136,0.35);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN CPANEL -->
+<div id="cp-login">
+  <div class="cp-login-title">CPANEL</div>
+  <div class="cp-login-sub">V-MASTERS · PANEL DE CONTROL</div>
+  <div class="cp-login-box">
+    <label class="cp-label">USUARIO</label>
+    <input class="cp-input" type="text" id="cp-user" placeholder="usuario" autocomplete="off" onkeydown="if(event.key==='Enter')document.getElementById('cp-pass').focus()">
+    <label class="cp-label">CONTRASEÑA</label>
+    <input class="cp-input" type="password" id="cp-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')cpLogin()">
+    <div class="cp-login-err" id="cp-login-err">CREDENCIALES INCORRECTAS</div>
+    <button class="cp-btn-login" onclick="cpLogin()">ACCEDER AL PANEL</button>
+  </div>
+</div>
+
+<!-- MAIN CPANEL -->
+<div id="cp-app" style="display:none">
+  <div class="cp-header">
+    <div class="cp-header-brand">
+      <div class="cp-brand-title">V-MASTERS</div>
+      <div class="cp-brand-badge">CPANEL</div>
+    </div>
+    <div class="cp-header-right">
+      <div class="cp-user-badge">SESIÓN: <span id="cp-username-display">—</span></div>
+      <button class="cp-btn back" onclick="window.location.href='/'">← DASHBOARD</button>
+      <button class="cp-btn logout" onclick="cpLogout()">SALIR</button>
+    </div>
+  </div>
+
+  <div class="cp-tabs">
+    <div class="cp-tab active" onclick="switchTab('cuentas',this)">CUENTAS <span class="cp-tab-count" id="tab-count-cuentas">0</span></div>
+    <div class="cp-tab" onclick="switchTab('meses',this)">EVOLUCIÓN MENSUAL <span class="cp-tab-count" id="tab-count-meses">0</span></div>
+    <div class="cp-tab" onclick="switchTab('historial',this)">HISTORIAL <span class="cp-tab-count" id="tab-count-hist">0</span></div>
+  </div>
+
+  <div class="cp-main">
+
+    <!-- TAB: CUENTAS -->
+    <div class="cp-section active" id="sec-cuentas">
+      <div class="sec-header">
+        <div>
+          <div class="sec-title">GESTIÓN DE <span>CUENTAS</span></div>
+          <div class="sec-subtitle">Administra todas las cuentas Vinted del sistema</div>
+        </div>
+      </div>
+
+      <!-- ADD FORM -->
+      <div class="add-account-panel">
+        <div class="add-form-title">AÑADIR NUEVA CUENTA</div>
+        <div class="add-form-grid">
+          <div class="form-group">
+            <div class="form-label">NOMBRE</div>
+            <input class="form-input" type="text" id="new-nombre" placeholder="Nombre cuenta">
+          </div>
+          <div class="form-group">
+            <div class="form-label">CORREO ELECTRÓNICO</div>
+            <input class="form-input" type="email" id="new-email" placeholder="correo@mail.com">
+          </div>
+          <div class="form-group">
+            <div class="form-label">MODELO DE MÓVIL</div>
+            <input class="form-input" type="text" id="new-movil" placeholder="Ej: iPhone 14 Pro">
+          </div>
+          <div class="form-group">
+            <div class="form-label">ESTADO</div>
+            <select class="form-select" id="new-estado">
+              <option value="abierta">✓ Abierta</option>
+              <option value="cerrada">⛔ Cerrada</option>
+              <option value="bloqueada">🔒 Bloqueada</option>
+            </select>
+          </div>
+          <button class="btn-add" onclick="addAccount()">+ CREAR</button>
+        </div>
+      </div>
+
+      <!-- ACCOUNTS GRID -->
+      <div class="accounts-grid" id="accounts-grid">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+    <!-- TAB: EVOLUCIÓN MENSUAL -->
+    <div class="cp-section" id="sec-meses">
+      <div class="sec-header">
+        <div>
+          <div class="sec-title">EVOLUCIÓN <span>MENSUAL</span></div>
+          <div class="sec-subtitle">Seguimiento del rendimiento mes a mes</div>
+        </div>
+      </div>
+
+      <!-- SUMMARY STATS -->
+      <div class="monthly-header-stats">
+        <div class="mstat-card" style="--line:var(--green)">
+          <div class="mstat-label">MEJOR MES (BENEFICIO)</div>
+          <div class="mstat-val" id="ms-mejor" style="color:var(--green)">—</div>
+        </div>
+        <div class="mstat-card" style="--line:var(--red)">
+          <div class="mstat-label">PEOR MES</div>
+          <div class="mstat-val" id="ms-peor" style="color:var(--red)">—</div>
+        </div>
+        <div class="mstat-card" style="--line:var(--cyan)">
+          <div class="mstat-label">TOTAL ACUMULADO</div>
+          <div class="mstat-val" id="ms-total" style="color:var(--cyan)">0€</div>
+        </div>
+        <div class="mstat-card" style="--line:var(--amber)">
+          <div class="mstat-label">MESES REGISTRADOS</div>
+          <div class="mstat-val" id="ms-count" style="color:var(--amber)">0</div>
+        </div>
+      </div>
+
+      <!-- CHART -->
+      <div class="monthly-chart-wrap">
+        <div class="monthly-chart-title">
+          PROGRESIÓN ANUAL
+          <div class="chart-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Vendido</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Invertido</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--cyan)"></div>Beneficio</div>
+          </div>
+        </div>
+        <div class="monthly-chart-canvas"><canvas id="monthly-chart"></canvas></div>
+      </div>
+
+      <!-- TABLE -->
+      <div class="months-table-wrap">
+        <table class="months-table">
+          <thead>
+            <tr>
+              <th>MES</th><th>AÑO</th><th>VENDIDO</th><th>INVERTIDO</th><th>BENEFICIO</th><th>PRODUCTOS</th><th>PROGRESO</th><th>ACCIONES</th>
+            </tr>
+          </thead>
+          <tbody id="months-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- ADD MONTH -->
+      <div class="add-month-panel">
+        <div class="add-form-title" style="color:var(--green)">REGISTRAR MES</div>
+        <div class="add-month-grid">
+          <div class="form-group">
+            <div class="form-label">MES</div>
+            <select class="form-select" id="nm-mes">
+              <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+              <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+              <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+              <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <div class="form-label">AÑO</div>
+            <input class="form-input" type="number" id="nm-anio" value="2026" min="2024" max="2030">
+          </div>
+          <div class="form-group">
+            <div class="form-label">TOTAL VENDIDO (€)</div>
+            <input class="form-input" type="number" id="nm-vendido" placeholder="0.00" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <div class="form-label">TOTAL INVERTIDO (€)</div>
+            <input class="form-input" type="number" id="nm-invertido" placeholder="0.00" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <div class="form-label">Nº PRODUCTOS</div>
+            <input class="form-input" type="number" id="nm-productos" placeholder="0" min="0">
+          </div>
+          <div class="form-group">
+            <div class="form-label">NOTAS</div>
+            <input class="form-input" type="text" id="nm-notas" placeholder="Opcional...">
+          </div>
+          <button class="btn-green" onclick="addMonth()">+ GUARDAR</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: HISTORIAL -->
+    <div class="cp-section" id="sec-historial">
+      <div class="sec-header">
+        <div>
+          <div class="sec-title">HISTORIAL DE <span>CUENTAS</span></div>
+          <div class="sec-subtitle">Registro de cuentas cerradas y bloqueadas con su resultado final</div>
+        </div>
+      </div>
+
+      <div class="history-stats">
+        <div class="hist-card">
+          <div class="hist-label">TOTAL REGISTROS</div>
+          <div class="hist-val" id="hs-total" style="color:var(--cyan)">0</div>
+        </div>
+        <div class="hist-card">
+          <div class="hist-label">BENEFICIO TOTAL HISTÓRICO</div>
+          <div class="hist-val" id="hs-beneficio" style="color:var(--green)">0€</div>
+        </div>
+        <div class="hist-card">
+          <div class="hist-label">BLOQUEADAS vs CERRADAS</div>
+          <div class="hist-val" id="hs-ratio" style="color:var(--amber)">0 / 0</div>
+        </div>
+      </div>
+
+      <div class="history-list" id="history-list">
+        <div class="empty-hist">
+          <div class="empty-hist-icon">📋</div>
+          <div class="empty-hist-text">SIN REGISTROS HISTÓRICOS</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL EDIT ACCOUNT -->
+<div class="cp-modal" id="cp-modal">
+  <div class="cp-modal-box">
+    <div class="cp-modal-title" id="cp-modal-title">EDITAR CUENTA</div>
+    <div id="cp-modal-fields"></div>
+    <div class="cp-modal-actions">
+      <button class="btn-save" onclick="submitCpEdit()">GUARDAR</button>
+      <button class="btn-cancel" onclick="closeCpModal()">CANCELAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CHANGE STATUS -->
+<div class="cp-modal" id="status-modal">
+  <div class="cp-modal-box">
+    <div class="cp-modal-title" id="status-modal-title">CAMBIAR ESTADO</div>
+    <div id="status-modal-fields"></div>
+    <div class="cp-modal-actions">
+      <button class="btn-save" id="status-confirm-btn">CONFIRMAR</button>
+      <button class="btn-cancel" onclick="closeStatusModal()">CANCELAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM -->
+<div class="cp-confirm" id="cp-confirm">
+  <div class="cp-confirm-box">
+    <h3 id="cp-confirm-title">CONFIRMAR</h3>
+    <p id="cp-confirm-msg">¿Estás seguro?</p>
+    <div class="cp-confirm-btns">
+      <button class="btn-danger" id="cp-confirm-yes">CONFIRMAR</button>
+      <button class="btn-cancel" onclick="closeCpConfirm()">CANCELAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- MONTH EDIT MODAL -->
+<div class="cp-modal" id="month-modal">
+  <div class="cp-modal-box">
+    <div class="cp-modal-title">EDITAR MES</div>
+    <div class="cp-modal-grid">
+      <div class="form-group"><div class="form-label">VENDIDO (€)</div><input class="form-input" id="em-vendido" type="number" step="0.01"></div>
+      <div class="form-group"><div class="form-label">INVERTIDO (€)</div><input class="form-input" id="em-invertido" type="number" step="0.01"></div>
+      <div class="form-group"><div class="form-label">Nº PRODUCTOS</div><input class="form-input" id="em-productos" type="number"></div>
+      <div class="form-group"><div class="form-label">NOTAS</div><input class="form-input" id="em-notas" type="text"></div>
+    </div>
+    <div class="cp-modal-actions">
+      <button class="btn-save" onclick="submitMonthEdit()">GUARDAR</button>
+      <button class="btn-cancel" onclick="closeMonthModal()">CANCELAR</button>
+    </div>
+  </div>
+</div>
+
+<div class="cp-toast" id="cp-toast"></div>
+
+<script>
+const CP_USERS = { "Miguel": "Miguel", "Esteban": "Esteban" };
+let cpUser = null;
+let allCuentas = [], allMonths = [], allHistory = [];
+let editCuentaId = null, editMonthId = null, cpConfirmCb = null;
+let monthChart = null;
+
+const MESES_NOMBRES = ['','ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+
+/* ── LOGIN ── */
+function cpLogin() {
+  const u = document.getElementById('cp-user').value.trim();
+  const p = document.getElementById('cp-pass').value;
+  const err = document.getElementById('cp-login-err');
+  if (CP_USERS[u] && CP_USERS[u] === p) {
+    cpUser = u;
+    err.classList.remove('show');
+    const login = document.getElementById('cp-login');
+    login.classList.add('hidden');
+    setTimeout(() => {
+      login.style.display = 'none';
+      document.getElementById('cp-app').style.display = 'block';
+      document.getElementById('cp-username-display').textContent = u.toUpperCase();
+      loadAll();
+    }, 600);
+  } else {
+    err.classList.add('show');
+    document.getElementById('cp-pass').value = '';
+    setTimeout(() => document.getElementById('cp-pass').focus(), 100);
+  }
+}
+
+function cpLogout() {
+  document.getElementById('cp-app').style.display = 'none';
+  const login = document.getElementById('cp-login');
+  login.classList.remove('hidden');
+  login.style.display = 'flex';
+  document.getElementById('cp-user').value = '';
+  document.getElementById('cp-pass').value = '';
+  document.getElementById('cp-login-err').classList.remove('show');
+}
+
+/* ── TABS ── */
+function switchTab(name, el) {
+  document.querySelectorAll('.cp-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.cp-section').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('sec-' + name).classList.add('active');
+  if (name === 'meses') renderMonthChart();
+}
+
+/* ── LOAD ALL ── */
+async function loadAll() {
+  await Promise.all([loadCuentas(), loadMonths(), loadHistory()]);
+}
+
+/* ── CUENTAS ── */
+async function loadCuentas() {
+  try {
+    const r = await fetch('/api/cuentas');
+    allCuentas = await r.json();
+    renderCuentas();
+    document.getElementById('tab-count-cuentas').textContent = allCuentas.length;
+  } catch(e) { console.error(e); }
+}
+
+function renderCuentas() {
+  const grid = document.getElementById('accounts-grid');
+  if (!allCuentas.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-muted)"><div style="font-size:40px;opacity:0.2;margin-bottom:12px">👤</div><div style="font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px">SIN CUENTAS REGISTRADAS</div></div>`;
+    return;
+  }
+
+  grid.innerHTML = allCuentas.map((c, idx) => {
+    const estado = c.estado || 'abierta';
+    const statusLabel = estado === 'abierta' ? '✓ ABIERTA' : estado === 'cerrada' ? '⛔ CERRADA' : '🔒 BLOQUEADA';
+    const isOpen = estado === 'abierta';
+    const isClose = estado === 'cerrada';
+    const isBlock = estado === 'bloqueada';
+
+    return `<div class="account-card ${estado}" style="animation-delay:${idx * 0.05}s">
+      <div class="ac-top">
+        <div>
+          <div class="ac-name">${c.nombre_gmail || '—'}</div>
+          <div class="ac-email">${c.correo || 'sin correo'}</div>
+        </div>
+        <div class="ac-status ${estado}">
+          <div class="ac-status-dot"></div>
+          ${statusLabel}
+        </div>
+      </div>
+      <div class="ac-fields">
+        <div class="ac-field">
+          <div class="ac-field-label">CORREO</div>
+          <div class="ac-field-val" style="font-size:11px">${c.correo || '—'}</div>
+        </div>
+        <div class="ac-field">
+          <div class="ac-field-label">MODELO MÓVIL</div>
+          <div class="ac-field-val model">${c.modelo_movil || '—'}</div>
+        </div>
+      </div>
+      <div class="ac-actions">
+        <button class="ac-btn edit" onclick="openEditCuenta(${c.id})">✎ EDITAR</button>
+        ${isOpen ? `<button class="ac-btn close" onclick="changeStatus(${c.id},'cerrada')">⛔ CERRAR</button>` : ''}
+        ${isOpen ? `<button class="ac-btn block" onclick="changeStatus(${c.id},'bloqueada')">🔒 BLOQUEAR</button>` : ''}
+        ${!isOpen ? `<button class="ac-btn open" onclick="changeStatus(${c.id},'abierta')">✓ REABRIR</button>` : ''}
+        <button class="ac-btn del" onclick="deleteCuenta(${c.id},'${escQ(c.nombre_gmail||'')}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function addAccount() {
+  const nombre = document.getElementById('new-nombre').value.trim();
+  const correo = document.getElementById('new-email').value.trim();
+  const movil  = document.getElementById('new-movil').value.trim();
+  const estado = document.getElementById('new-estado').value;
+
+  if (!nombre) { cpToast('Escribe el nombre de la cuenta', 'err'); return; }
+
+  const r = await fetch('/api/cuentas', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nombre_gmail: nombre, correo, modelo_movil: movil, estado })
+  });
+  const res = await r.json();
+  if (res.status === 'error') { cpToast('Error: ' + res.error, 'err'); return; }
+
+  document.getElementById('new-nombre').value = '';
+  document.getElementById('new-email').value = '';
+  document.getElementById('new-movil').value = '';
+  cpToast('✓ Cuenta creada', 'ok');
+  loadCuentas();
+}
+
+function openEditCuenta(id) {
+  editCuentaId = id;
+  const c = allCuentas.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('cp-modal-title').textContent = 'EDITAR CUENTA';
+  document.getElementById('cp-modal-fields').innerHTML = `
+    <div class="cp-modal-grid">
+      <div class="form-group"><div class="form-label">NOMBRE</div><input class="form-input" id="em-nombre" value="${escAttr(c.nombre_gmail||'')}"></div>
+      <div class="form-group"><div class="form-label">CORREO</div><input class="form-input" id="em-correo" type="email" value="${escAttr(c.correo||'')}"></div>
+      <div class="form-group"><div class="form-label">MODELO MÓVIL</div><input class="form-input" id="em-movil" value="${escAttr(c.modelo_movil||'')}"></div>
+      <div class="form-group"><div class="form-label">ESTADO</div>
+        <select class="form-select" id="em-estado">
+          <option value="abierta" ${c.estado==='abierta'?'selected':''}>✓ Abierta</option>
+          <option value="cerrada" ${c.estado==='cerrada'?'selected':''}>⛔ Cerrada</option>
+          <option value="bloqueada" ${c.estado==='bloqueada'?'selected':''}>🔒 Bloqueada</option>
+        </select>
+      </div>
+    </div>`;
+  openCpModal();
+}
+
+async function submitCpEdit() {
+  const nombre = document.getElementById('em-nombre').value.trim();
+  const correo = document.getElementById('em-correo').value.trim();
+  const movil  = document.getElementById('em-movil').value.trim();
+  const estado = document.getElementById('em-estado').value;
+  if (!nombre) return;
+
+  await fetch(`/api/editar-cuenta/${editCuentaId}`, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nombre_gmail: nombre, correo, modelo_movil: movil, estado })
+  });
+  cpToast('✓ Cuenta actualizada', 'ok');
+  closeCpModal();
+  loadCuentas();
+}
+
+function changeStatus(id, nuevoEstado) {
+  const c = allCuentas.find(x => x.id === id);
+  const label = nuevoEstado === 'cerrada' ? 'CERRAR' : nuevoEstado === 'bloqueada' ? 'BLOQUEAR' : 'REABRIR';
+  const isCierre = nuevoEstado === 'cerrada' || nuevoEstado === 'bloqueada';
+
+  document.getElementById('status-modal-title').textContent = label + ' CUENTA';
+  document.getElementById('status-modal-fields').innerHTML = `
+    <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-dim);margin-bottom:14px;letter-spacing:1px">
+      Cuenta: <span style="color:var(--cyan)">${escAttr(c?.nombre_gmail||'')}</span>
+    </div>
+    ${isCierre ? `
+    <div class="close-beneficio-form">
+      <div class="close-ben-label">REGISTRAR BENEFICIO FINAL (opcional)</div>
+      <input class="form-input" type="number" id="sb-beneficio" placeholder="Beneficio neto €" step="0.01">
+      <div style="margin-top:8px">
+        <input class="form-input" type="text" id="sb-notas" placeholder="Notas finales..." style="margin-top:6px">
+      </div>
+    </div>` : ''}`;
+
+  document.getElementById('status-confirm-btn').onclick = async () => {
+    const beneficio = isCierre ? (parseFloat(document.getElementById('sb-beneficio')?.value) || null) : null;
+    const notas     = isCierre ? (document.getElementById('sb-notas')?.value || '') : '';
+
+    await fetch(`/api/editar-cuenta/${id}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ estado: nuevoEstado })
+    });
+
+    // Si se cierra o bloquea, guardar en historial
+    if (isCierre && c) {
+      await fetch('/api/historial-cuentas', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre_cuenta: c.nombre_gmail || '',
+          correo: c.correo || '',
+          modelo_movil: c.modelo_movil || '',
+          tipo_cierre: nuevoEstado,
+          beneficio_final: beneficio,
+          notas: notas,
+          fecha_cierre: new Date().toISOString()
+        })
+      });
+    }
+
+    closeStatusModal();
+    cpToast(`✓ Estado actualizado: ${nuevoEstado.toUpperCase()}`, 'ok');
+    loadCuentas();
+    loadHistory();
+  };
+
+  document.getElementById('status-modal').style.display = 'flex';
+  requestAnimationFrame(() => document.getElementById('status-modal').classList.add('open'));
+}
+
+function closeStatusModal() {
+  const m = document.getElementById('status-modal');
+  m.classList.remove('open');
+  setTimeout(() => { m.style.display = 'none'; }, 300);
+}
+
+function deleteCuenta(id, nombre) {
+  openCpConfirm('ELIMINAR CUENTA', `¿Seguro que quieres eliminar "${nombre}"? Se borrarán TODOS sus productos.`, async () => {
+    await fetch(`/api/eliminar-cuenta/${id}`, { method: 'DELETE' });
+    cpToast('Cuenta eliminada', 'ok');
+    loadCuentas();
+  });
+}
+
+/* ── MONTHLY STATS ── */
+async function loadMonths() {
+  try {
+    const r = await fetch('/api/stats-mensuales');
+    allMonths = await r.json();
+    renderMonths();
+    document.getElementById('tab-count-meses').textContent = allMonths.length;
+  } catch(e) { console.error(e); }
+}
+
+function renderMonths() {
+  const tbody = document.getElementById('months-tbody');
+
+  if (!allMonths.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted);font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px">SIN DATOS MENSUALES</td></tr>`;
+    updateMonthStats([]);
+    return;
+  }
+
+  const maxVenta = Math.max(...allMonths.map(m => parseFloat(m.total_vendido) || 0), 1);
+
+  tbody.innerHTML = allMonths.map((m, idx) => {
+    const venta = parseFloat(m.total_vendido) || 0;
+    const inv   = parseFloat(m.total_invertido) || 0;
+    const ben   = venta - inv;
+    const pct   = Math.min((venta / maxVenta) * 100, 100);
+    const benClass = ben > 0 ? 'month-val-pos' : ben < 0 ? 'month-val-neg' : 'month-val-neu';
+    const barColor = ben > 0 ? 'var(--green)' : 'var(--red)';
+
+    return `<tr style="animation:cardIn 0.4s ${idx * 0.04}s both">
+      <td><div class="month-badge">${MESES_NOMBRES[m.mes] || m.mes}</div>${m.notas ? `<div style="font-family:'Share Tech Mono';font-size:9px;color:var(--text-muted);margin-top:2px">${m.notas}</div>` : ''}</td>
+      <td style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text-muted)">${m.anio}</td>
+      <td><span class="month-val-pos">+${venta.toFixed(2)}€</span></td>
+      <td><span class="month-val-neg">${inv.toFixed(2)}€</span></td>
+      <td><span class="${benClass}">${ben >= 0 ? '+' : ''}${ben.toFixed(2)}€</span></td>
+      <td style="font-family:'Share Tech Mono',monospace;font-size:12px">${m.num_productos || 0}</td>
+      <td><div class="month-bar-wrap"><div class="month-bar-fill" style="width:${pct}%;background:${barColor}"></div></div></td>
+      <td><div class="td-actions">
+        <button class="tbl-btn edit" onclick="openMonthEdit(${m.id})" title="Editar">✎</button>
+        <button class="tbl-btn del" onclick="deleteMonth(${m.id})" title="Eliminar">✕</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+
+  updateMonthStats(allMonths);
+}
+
+function updateMonthStats(months) {
+  if (!months.length) {
+    document.getElementById('ms-mejor').textContent = '—';
+    document.getElementById('ms-peor').textContent = '—';
+    document.getElementById('ms-total').textContent = '0€';
+    document.getElementById('ms-count').textContent = '0';
+    return;
+  }
+  const withBen = months.map(m => ({ ...m, ben: (parseFloat(m.total_vendido)||0) - (parseFloat(m.total_invertido)||0) }));
+  const mejor = withBen.reduce((a,b) => b.ben > a.ben ? b : a);
+  const peor  = withBen.reduce((a,b) => b.ben < a.ben ? b : a);
+  const total = withBen.reduce((s, m) => s + m.ben, 0);
+  document.getElementById('ms-mejor').textContent = `${MESES_NOMBRES[mejor.mes]} +${mejor.ben.toFixed(0)}€`;
+  document.getElementById('ms-peor').textContent  = `${MESES_NOMBRES[peor.mes]} ${peor.ben.toFixed(0)}€`;
+  document.getElementById('ms-total').textContent = (total >= 0 ? '+' : '') + total.toFixed(2) + '€';
+  document.getElementById('ms-count').textContent = months.length;
+}
+
+function renderMonthChart() {
+  if (!allMonths.length) return;
+  const sorted = [...allMonths].sort((a,b) => a.anio !== b.anio ? a.anio - b.anio : a.mes - b.mes);
+  const labels = sorted.map(m => `${MESES_NOMBRES[m.mes]?.slice(0,3)} ${m.anio}`);
+  const dV = sorted.map(m => parseFloat(m.total_vendido)||0);
+  const dI = sorted.map(m => parseFloat(m.total_invertido)||0);
+  const dB = sorted.map(m => (parseFloat(m.total_vendido)||0) - (parseFloat(m.total_invertido)||0));
+
+  const ctx = document.getElementById('monthly-chart').getContext('2d');
+  if (monthChart) monthChart.destroy();
+
+  monthChart = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [
+      { label: 'Vendido', data: dV, backgroundColor: 'rgba(0,255,136,0.25)', borderColor: 'var(--green)', borderWidth: 2, borderRadius: 6 },
+      { label: 'Invertido', data: dI, backgroundColor: 'rgba(255,34,68,0.2)', borderColor: 'var(--red)', borderWidth: 2, borderRadius: 6 },
+      { label: 'Beneficio', data: dB, type: 'line', borderColor: 'var(--cyan)', backgroundColor: 'transparent', borderWidth: 2.5, pointRadius: 5, pointBackgroundColor: 'var(--cyan)', tension: 0.4, yAxisID: 'y' }
+    ]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 900, easing: 'easeInOutQuart' },
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: { backgroundColor: 'rgba(8,15,26,0.97)', borderColor: 'rgba(0,229,255,0.25)', borderWidth: 1, titleColor: '#ddeedd', bodyColor: 'rgba(221,238,221,0.75)', padding: 14, cornerRadius: 10, titleFont: { family: 'Share Tech Mono', size: 11 }, bodyFont: { family: 'Rajdhani', size: 13, weight: '600' }, callbacks: { label: c => `${c.dataset.label}: ${c.parsed.y.toFixed(2)}€` } }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: 'rgba(221,238,221,0.4)', font: { family: 'Share Tech Mono', size: 10 } }, border: { display: false } },
+        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: 'rgba(221,238,221,0.35)', font: { family: 'Share Tech Mono', size: 10 }, callback: v => v + '€' }, border: { display: false } }
+      }
+    }
+  });
+}
+
+async function addMonth() {
+  const mes      = parseInt(document.getElementById('nm-mes').value);
+  const anio     = parseInt(document.getElementById('nm-anio').value);
+  const vendido  = parseFloat(document.getElementById('nm-vendido').value) || 0;
+  const invertido= parseFloat(document.getElementById('nm-invertido').value) || 0;
+  const productos= parseInt(document.getElementById('nm-productos').value) || 0;
+  const notas    = document.getElementById('nm-notas').value.trim();
+
+  const r = await fetch('/api/stats-mensuales', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mes, anio, total_vendido: vendido, total_invertido: invertido, num_productos: productos, notas })
+  });
+  const res = await r.json();
+  if (res.status === 'error') { cpToast('Error: ' + res.error, 'err'); return; }
+
+  ['nm-vendido','nm-invertido','nm-productos','nm-notas'].forEach(id => document.getElementById(id).value = '');
+  cpToast('✓ Mes registrado', 'ok');
+  await loadMonths();
+  renderMonthChart();
+}
+
+function openMonthEdit(id) {
+  editMonthId = id;
+  const m = allMonths.find(x => x.id === id);
+  if (!m) return;
+  document.getElementById('em-vendido').value   = m.total_vendido || '';
+  document.getElementById('em-invertido').value = m.total_invertido || '';
+  document.getElementById('em-productos').value = m.num_productos || '';
+  document.getElementById('em-notas').value     = m.notas || '';
+  const modal = document.getElementById('month-modal');
+  modal.style.display = 'flex';
+  requestAnimationFrame(() => modal.classList.add('open'));
+}
+
+async function submitMonthEdit() {
+  const r = await fetch(`/api/stats-mensuales/${editMonthId}`, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      total_vendido:   parseFloat(document.getElementById('em-vendido').value) || 0,
+      total_invertido: parseFloat(document.getElementById('em-invertido').value) || 0,
+      num_productos:   parseInt(document.getElementById('em-productos').value) || 0,
+      notas:           document.getElementById('em-notas').value
+    })
+  });
+  closeMonthModal();
+  cpToast('✓ Mes actualizado', 'ok');
+  await loadMonths();
+  renderMonthChart();
+}
+
+function closeMonthModal() {
+  const m = document.getElementById('month-modal');
+  m.classList.remove('open');
+  setTimeout(() => { m.style.display = 'none'; }, 300);
+}
+
+function deleteMonth(id) {
+  openCpConfirm('ELIMINAR MES', '¿Eliminar este registro mensual?', async () => {
+    await fetch(`/api/stats-mensuales/${id}`, { method: 'DELETE' });
+    cpToast('Mes eliminado', 'ok');
+    await loadMonths();
+    renderMonthChart();
+  });
+}
+
+/* ── HISTORY ── */
+async function loadHistory() {
+  try {
+    const r = await fetch('/api/historial-cuentas');
+    allHistory = await r.json();
+    renderHistory();
+    document.getElementById('tab-count-hist').textContent = allHistory.length;
+  } catch(e) { console.error(e); }
+}
+
+function renderHistory() {
+  const list = document.getElementById('history-list');
+
+  // Stats
+  const total    = allHistory.length;
+  const totalBen = allHistory.reduce((s,h) => s + (parseFloat(h.beneficio_final)||0), 0);
+  const bloq     = allHistory.filter(h => h.tipo_cierre === 'bloqueada').length;
+  const cerr     = allHistory.filter(h => h.tipo_cierre === 'cerrada').length;
+
+  document.getElementById('hs-total').textContent     = total;
+  const hbEl = document.getElementById('hs-beneficio');
+  hbEl.textContent = (totalBen >= 0 ? '+' : '') + totalBen.toFixed(2) + '€';
+  hbEl.style.color = totalBen >= 0 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('hs-ratio').textContent = `${bloq} 🔒 / ${cerr} ⛔`;
+
+  if (!allHistory.length) {
+    list.innerHTML = `<div class="empty-hist"><div class="empty-hist-icon">📋</div><div class="empty-hist-text">SIN REGISTROS HISTÓRICOS</div></div>`;
+    return;
+  }
+
+  list.innerHTML = allHistory.map((h, idx) => {
+    const ben     = parseFloat(h.beneficio_final) || null;
+    const benClass = ben === null ? 'neu' : ben >= 0 ? 'pos' : 'neg';
+    const benText  = ben === null ? 'N/A' : (ben >= 0 ? '+' : '') + ben.toFixed(2) + '€';
+    const fecha    = h.fecha_cierre ? new Date(h.fecha_cierre) : null;
+    const fechaStr = fecha ? `${fecha.getDate()}/${fecha.getMonth()+1}/${fecha.getFullYear()}` : '—';
+
+    return `<div class="hist-item ${h.tipo_cierre}" style="animation-delay:${idx*0.04}s">
+      <div class="hist-item-info">
+        <div class="hist-name">${h.nombre_cuenta || '—'}</div>
+        <div class="hist-meta">
+          <span class="hist-tag ${h.tipo_cierre}">${h.tipo_cierre === 'bloqueada' ? '🔒 BLOQUEADA' : '⛔ CERRADA'}</span>
+          <span class="hist-date">${fechaStr}</span>
+          <span class="hist-email">${h.correo || ''}</span>
+          ${h.modelo_movil ? `<span class="hist-date">${h.modelo_movil}</span>` : ''}
+        </div>
+        ${h.notas ? `<div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-muted);margin-top:4px;letter-spacing:1px">${h.notas}</div>` : ''}
+      </div>
+      <div class="hist-beneficio">
+        <div class="hist-ben-label">BENEFICIO FINAL</div>
+        <div class="hist-ben-val ${benClass}">${benText}</div>
+      </div>
+      <button class="hist-delete" onclick="deleteHistItem(${h.id})" title="Eliminar registro">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function deleteHistItem(id) {
+  openCpConfirm('ELIMINAR REGISTRO', '¿Eliminar este registro del historial?', async () => {
+    await fetch(`/api/historial-cuentas/${id}`, { method: 'DELETE' });
+    cpToast('Registro eliminado', 'ok');
+    loadHistory();
+  });
+}
+
+/* ── MODAL HELPERS ── */
+function openCpModal() {
+  const m = document.getElementById('cp-modal');
+  m.style.display = 'flex';
+  requestAnimationFrame(() => m.classList.add('open'));
+}
+function closeCpModal() {
+  const m = document.getElementById('cp-modal');
+  m.classList.remove('open');
+  setTimeout(() => { m.style.display = 'none'; }, 300);
+}
+
+function openCpConfirm(title, msg, cb) {
+  document.getElementById('cp-confirm-title').textContent = title;
+  document.getElementById('cp-confirm-msg').textContent   = msg;
+  cpConfirmCb = cb;
+  const o = document.getElementById('cp-confirm');
+  o.style.display = 'flex';
+  requestAnimationFrame(() => o.classList.add('open'));
+  document.getElementById('cp-confirm-yes').onclick = () => { closeCpConfirm(); if (cpConfirmCb) cpConfirmCb(); };
+}
+function closeCpConfirm() {
+  const o = document.getElementById('cp-confirm');
+  o.classList.remove('open');
+  setTimeout(() => { o.style.display = 'none'; }, 300);
+}
+
+/* ── TOAST ── */
+let _cpToastTimer = null;
+function cpToast(msg, type = 'ok') {
+  const t = document.getElementById('cp-toast');
+  t.textContent = msg;
+  t.className = 'cp-toast ' + type;
+  if (_cpToastTimer) clearTimeout(_cpToastTimer);
+  t.classList.remove('show'); t.offsetHeight; t.classList.add('show');
+  _cpToastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ── UTILS ── */
+function escQ(s) { return String(s).replace(/'/g, "\\'"); }
+function escAttr(s) { return String(s).replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+
+/* ── CLOSE MODALS ON BACKDROP ── */
+['cp-modal','status-modal','month-modal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', function(e) { if(e.target === this) { this.classList.remove('open'); setTimeout(() => { this.style.display='none'; }, 300); } });
+});
+document.getElementById('cp-confirm').addEventListener('click', function(e) { if(e.target === this) closeCpConfirm(); });
+
+/* ── AUTO LOGIN INPUT ENTER ── */
+document.getElementById('cp-user').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('cp-pass').focus(); });
+</script>
+</body>
+</html>
