@@ -26,14 +26,20 @@ app.get('/api/datos', async (req, res) => {
 app.post('/api/nuevo', async (req, res) => {
     const payload = { ...req.body };
     if (!payload.fecha_venta) payload.fecha_venta = new Date().toISOString();
+    // Ensure id_cuenta is a number
+    if (payload.id_cuenta) payload.id_cuenta = parseInt(payload.id_cuenta);
+    // Remove any undefined fields
+    Object.keys(payload).forEach(k => { if (payload[k] === undefined || payload[k] === null && k !== 'precio_compra') delete payload[k]; });
+    console.log('POST /api/nuevo payload:', JSON.stringify(payload));
     const { data, error } = await supabase
         .from('inventario')
         .insert([payload])
         .select();
     if (error) {
-        console.error('POST /api/nuevo:', error.message);
-        return res.status(500).json({ status: 'error', error: error.message });
+        console.error('POST /api/nuevo ERROR:', error.message, '| code:', error.code, '| details:', error.details);
+        return res.status(500).json({ status: 'error', error: error.message, code: error.code });
     }
+    console.log('POST /api/nuevo OK, id:', data?.[0]?.id);
     res.json({ status: 'ok', data });
 });
 
@@ -64,8 +70,18 @@ app.get('/api/cuentas', async (req, res) => {
         .from('cuentas')
         .select('*')
         .order('nombre_gmail', { ascending: true });
-    if (error) console.error('GET /api/cuentas:', error.message);
-    res.json(data || []);
+    if (error) {
+        console.error('GET /api/cuentas:', error.message);
+        return res.status(500).json({ status: 'error', error: error.message });
+    }
+    // Normalise: ensure estado field always exists (default 'abierta')
+    const normalised = (data || []).map(c => ({
+        ...c,
+        estado: c.estado || 'abierta',
+        correo: c.correo || '',
+        modelo_movil: c.modelo_movil || ''
+    }));
+    res.json(normalised);
 });
 
 app.post('/api/cuentas', async (req, res) => {
@@ -81,12 +97,22 @@ app.post('/api/cuentas', async (req, res) => {
 });
 
 app.put('/api/editar-cuenta/:id', async (req, res) => {
+    // Only include fields that are actually present in the request
+    const allowed = ['nombre_gmail', 'correo', 'modelo_movil', 'estado'];
+    const update = {};
+    allowed.forEach(k => { if (req.body[k] !== undefined) update[k] = req.body[k]; });
+    if (Object.keys(update).length === 0) {
+        return res.json({ status: 'ok', msg: 'nothing to update' });
+    }
     const { error } = await supabase
         .from('cuentas')
-        .update(req.body)
+        .update(update)
         .eq('id', req.params.id);
-    if (error) console.error('PUT /api/editar-cuenta:', error.message);
-    res.json({ status: error ? 'error' : 'ok' });
+    if (error) {
+        console.error('PUT /api/editar-cuenta:', error.message);
+        return res.status(500).json({ status: 'error', error: error.message });
+    }
+    res.json({ status: 'ok' });
 });
 
 app.delete('/api/reset-cuenta/:id', async (req, res) => {
