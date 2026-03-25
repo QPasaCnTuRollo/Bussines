@@ -195,8 +195,8 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .chart-legend{display:flex;gap:16px;justify-content:flex-end;padding:0 4px;flex-shrink:0;}
 .chart-legend-item{display:flex;align-items:center;gap:6px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1.5px;color:rgba(240,255,244,0.5);}
 .chart-legend-line{display:inline-block;width:20px;height:3px;border-radius:2px;}
-.chart-canvas-wrap{flex:1;min-height:160px;position:relative;}
-.chart-canvas-wrap canvas{display:block;width:100%!important;height:100%!important;}
+.chart-canvas-wrap{flex:1;min-height:180px;position:relative;overflow:hidden;}
+.chart-canvas-wrap canvas{display:block;}
 .chart-empty-state{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;pointer-events:none;}
 .chart-empty-icon{font-size:30px;opacity:0.15;animation:emptyFloat 3s ease-in-out infinite;}
 @keyframes emptyFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
@@ -698,83 +698,115 @@ function render(){
 }
 
 function buildChart(data,totalInv){
-  const canvasEl=document.getElementById('main-chart');
-  const emptyEl=document.getElementById('chart-empty-state');
-  const legendEl=document.getElementById('chart-legend');
+  const canvasEl  = document.getElementById('main-chart');
+  const emptyEl   = document.getElementById('chart-empty-state');
+  const legendEl  = document.getElementById('chart-legend');
 
+  // Always destroy before recreating
   if(chartInst){chartInst.destroy();chartInst=null;}
 
-  const sorted=[...data].sort((a,b)=>a.id-b.id);
+  const sorted = [...data].sort((a,b)=>a.id-b.id);
 
   if(sorted.length===0){
     emptyEl.style.display='flex';
     legendEl.style.display='none';
     return;
   }
-
   emptyEl.style.display='none';
   legendEl.style.display='flex';
 
+  // Build data arrays
   const labels=[],dVenta=[],dInv=[];
   let acc=0;
   sorted.forEach((s,i)=>{
-    acc+=parseFloat(s.precio_venta)||0;
+    acc += parseFloat(s.precio_venta)||0;
     labels.push('#'+(i+1));
     dVenta.push(parseFloat(acc.toFixed(2)));
     dInv.push(parseFloat(totalInv.toFixed(2)));
   });
 
-  // Give the canvas explicit pixel size so Chart.js never gets 0x0
-  const wrap=canvasEl.parentElement;
-  const wh=wrap.offsetHeight||240;
-  const ww=wrap.offsetWidth||wrap.clientWidth||400;
-  canvasEl.style.cssText=`width:${ww}px;height:${wh}px;display:block;`;
+  // Use rAF so layout is committed — measure wrapper for gradient height
+  requestAnimationFrame(()=>{
+    const wrap = canvasEl.parentElement;
+    const wh   = wrap.clientHeight || wrap.offsetHeight || 200;
+    const ww   = wrap.clientWidth  || wrap.offsetWidth  || 400;
 
-  const ctx=canvasEl.getContext('2d');
-  let gradFill='rgba(0,255,136,0.18)';
-  try{
-    const g=ctx.createLinearGradient(0,0,0,wh);
-    g.addColorStop(0,'rgba(0,255,136,0.40)');
-    g.addColorStop(0.6,'rgba(0,255,136,0.06)');
-    g.addColorStop(1,'rgba(0,255,136,0.00)');
-    gradFill=g;
-  }catch(e){}
+    // Set explicit pixel size on canvas BEFORE getting context
+    canvasEl.style.width  = ww + 'px';
+    canvasEl.style.height = wh + 'px';
+    canvasEl.width  = ww;
+    canvasEl.height = wh;
 
-  chartInst=new Chart(ctx,{
-    type:'line',
-    data:{labels,datasets:[
-      {label:'Total Ganado',data:dVenta,borderColor:'#00ff88',borderWidth:2.5,
-       backgroundColor:gradFill,fill:true,tension:0.42,
-       pointRadius:sorted.length===1?8:3,pointHoverRadius:8,
-       pointBackgroundColor:'#00ff88',pointBorderColor:'#04080f',pointBorderWidth:2,order:1},
-      {label:'Total Invertido',data:dInv,borderColor:'#ff2244',borderWidth:2.2,
-       borderDash:[8,5],backgroundColor:'transparent',fill:false,tension:0,
-       pointRadius:sorted.length===1?6:0,pointHoverRadius:6,
-       pointBackgroundColor:'#ff2244',pointBorderColor:'#04080f',pointBorderWidth:2,order:2}
-    ]},
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      animation:{duration:700,easing:'easeInOutQuart'},
-      interaction:{mode:'index',intersect:false},
-      plugins:{
-        legend:{display:false},
-        tooltip:{enabled:true,backgroundColor:'rgba(8,15,26,0.97)',borderColor:'rgba(0,255,136,0.25)',
-          borderWidth:1,titleColor:'#ddeedd',bodyColor:'rgba(221,238,221,0.8)',padding:14,cornerRadius:10,
-          titleFont:{family:'Share Tech Mono',size:11},bodyFont:{family:'Rajdhani',size:13,weight:'600'},
-          callbacks:{
-            label:(c)=>c.datasetIndex===0?' ▲ GANADO: '+c.parsed.y.toFixed(2)+'€':' ▼ INVERTIDO: '+c.parsed.y.toFixed(2)+'€',
-            afterBody:(items)=>{
-              if(items.length>=2&&totalInv>0){const d=items[0].parsed.y-items[1].parsed.y;return['',d>=0?' ✓ PROFIT: +'+d.toFixed(2)+'€':' ✗ PÉRDIDA: '+d.toFixed(2)+'€'];}
-              return[];
+    const ctx = canvasEl.getContext('2d');
+
+    // Build gradient safely
+    let gradFill = 'rgba(0,255,136,0.18)';
+    try{
+      const g = ctx.createLinearGradient(0,0,0,wh);
+      g.addColorStop(0,  'rgba(0,255,136,0.40)');
+      g.addColorStop(0.6,'rgba(0,255,136,0.07)');
+      g.addColorStop(1,  'rgba(0,255,136,0.00)');
+      gradFill = g;
+    }catch(e){}
+
+    chartInst = new Chart(ctx,{
+      type:'line',
+      data:{labels,datasets:[
+        {label:'Total Ganado',   data:dVenta,
+         borderColor:'#00ff88', borderWidth:2.5,
+         backgroundColor:gradFill, fill:true, tension:0.42,
+         pointRadius:sorted.length===1?8:3, pointHoverRadius:8,
+         pointBackgroundColor:'#00ff88', pointBorderColor:'#04080f', pointBorderWidth:2,
+         order:1},
+        {label:'Total Invertido',data:dInv,
+         borderColor:'#ff2244', borderWidth:2.2,
+         borderDash:[8,5], backgroundColor:'transparent', fill:false, tension:0,
+         pointRadius:sorted.length===1?6:0, pointHoverRadius:6,
+         pointBackgroundColor:'#ff2244', pointBorderColor:'#04080f', pointBorderWidth:2,
+         order:2}
+      ]},
+      options:{
+        responsive:false,
+        maintainAspectRatio:false,
+        animation:{duration:700,easing:'easeInOutQuart'},
+        interaction:{mode:'index',intersect:false},
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            enabled:true,
+            backgroundColor:'rgba(8,15,26,0.97)',
+            borderColor:'rgba(0,255,136,0.25)', borderWidth:1,
+            titleColor:'#ddeedd', bodyColor:'rgba(221,238,221,0.8)',
+            padding:14, cornerRadius:10,
+            titleFont:{family:'Share Tech Mono',size:11},
+            bodyFont:{family:'Rajdhani',size:13,weight:'600'},
+            callbacks:{
+              label:(c)=>c.datasetIndex===0
+                ?' ▲ GANADO: '+c.parsed.y.toFixed(2)+'€'
+                :' ▼ INVERTIDO: '+c.parsed.y.toFixed(2)+'€',
+              afterBody:(items)=>{
+                if(items.length>=2&&totalInv>0){
+                  const d=items[0].parsed.y-items[1].parsed.y;
+                  return['',d>=0?' ✓ PROFIT: +'+d.toFixed(2)+'€':' ✗ PÉRDIDA: '+d.toFixed(2)+'€'];
+                }
+                return[];
+              }
             }
           }
+        },
+        scales:{
+          x:{display:true,
+             grid:{color:'rgba(255,255,255,0.03)'},
+             ticks:{color:'rgba(221,238,221,0.3)',font:{family:'Share Tech Mono',size:9},maxTicksLimit:8},
+             border:{display:false}},
+          y:{display:true,
+             grid:{color:'rgba(255,255,255,0.04)'},
+             ticks:{color:'rgba(221,238,221,0.35)',font:{family:'Share Tech Mono',size:9},
+                    callback:v=>v+'€',maxTicksLimit:6},
+             border:{display:false}}
         }
-      },
-      scales:{
-        x:{display:true,grid:{color:'rgba(255,255,255,0.03)'},ticks:{color:'rgba(221,238,221,0.3)',font:{family:'Share Tech Mono',size:9},maxTicksLimit:8},border:{display:false}},
-        y:{display:true,grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'rgba(221,238,221,0.35)',font:{family:'Share Tech Mono',size:9},callback:v=>v+'€',maxTicksLimit:6},border:{display:false}}
       }
-    }
+    });
   });
 }
 
@@ -888,28 +920,15 @@ function showToast(msg,isError=false){
 
 function escQ(s){return String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;');}
 
+// Redraw chart on window resize (responsive:false requires manual redraw)
+let _resizeTimer=null;
 window.addEventListener('resize',()=>{
-  if(sales.length&&document.getElementById('sel-cuenta').value){
-    // Destroy chart so it redraws at new size
-    if(chartInst){chartInst.destroy();chartInst=null;}
-    render();
-  }
+  clearTimeout(_resizeTimer);
+  _resizeTimer=setTimeout(()=>{
+    const idC=document.getElementById('sel-cuenta').value;
+    if(sales.length&&idC) render();
+  },150);
 });
-// Also watch the chart container for size changes
-(function(){
-  const wrap=document.querySelector('.chart-canvas-wrap');
-  if(!wrap||!window.ResizeObserver) return;
-  new ResizeObserver(()=>{
-    if(chartInst&&sales.length&&document.getElementById('sel-cuenta').value){
-      if(chartInst){chartInst.destroy();chartInst=null;}
-      const idC=document.getElementById('sel-cuenta').value;
-      const filter=sales.filter(s=>String(s.id_cuenta)===String(idC));
-      const envio=parseFloat(document.getElementById('inp-envio').value)||0;
-      const invertido=parseFloat(document.getElementById('inp-invertido').value)||0;
-      buildChart(filter,invertido+envio);
-    }
-  }).observe(wrap);
-})();
 document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
 document.getElementById('confirm-overlay').addEventListener('click',function(e){if(e.target===this)closeConfirm();});
 </script>
